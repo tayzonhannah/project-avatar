@@ -278,11 +278,13 @@ Copernicus Climate Change Service. (2020). *ERA5-Land hourly data from 1950 to p
 
 Department of Environment and Natural Resources. (2020). *Administrative Order No. 2020-14: Revised national ambient air quality guideline values for particulate matter 2.5 (PM2.5)*. DENR Environmental Management Bureau. https://air.emb.gov.ph/wp-content/uploads/2020/07/DAO-2020-14-PM2.5.pdf
 
-Department of Health. (2023). *Philippine integrated disease surveillance and response: System overview and operational manual*. Epidemiology Bureau, Department of Health, Republic of the Philippines. https://doh.gov.ph/pidsr-manual/
+Department of Health. (2023). *Philippine integrated disease surveillance and response: System overview and operational manual*. Epidemiology Bureau, Department of Health, Republic of the Philippines. https://doh.gov.ph/
 
 European Space Agency. (2021). *Sentinel-5P TROPOMI science product user guide* (Doc. No. S5P-MPC-SRON-SPUG). European Space Agency. https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-5p-tropomi/
 
 Lyapustin, A., Wang, Y., Korkin, S., & Huang, D. (2018). MODIS collection 6 MAIAC algorithm. *Atmospheric Measurement Techniques*, 11(10), 5741–5765. https://doi.org/10.5194/amt-11-5741-2018
+
+Muñoz-Sabater, J., Dutra, E., Agustí-Panareda, A., Albergel, C., Arduini, G., Balsamo, G., Boussetta, S., Choulga, M., Harrigan, S., Hersbach, H., Martens, B., Miralles, D. G., Piles, M., Rodríguez-Fernández, N. J., Zsoter, E., Buontempo, C., & Thépaut, J.-N. (2021). ERA5-Land: A state-of-the-art global reanalysis dataset for land applications. *Earth System Science Data*, 13(9), 4349–4383. https://doi.org/10.5194/essd-13-4349-2021
 
 NASA Jet Propulsion Laboratory. (2013). *NASA Shuttle Radar Topography Mission (SRTM) global 1 arc-second* [Data set]. NASA EOSDIS Land Processes DAAC. https://doi.org/10.5067/MEaSUREs/SRTM/SRTMGL1.003
 
@@ -290,7 +292,7 @@ National Privacy Commission. (2016). *NPC Circular 16-01: Security of personal d
 
 Philippine Atmospheric, Geophysical and Astronomical Services Administration. (2024). *Manual of meteorological observation practices in the Philippines*. Department of Science and Technology. https://bagong.pagasa.dost.gov.ph/learning-tools/meteorological-instruments
 
-Philippine Statistics Authority. (2021). *2020 census of population and housing (2020 CPH) population counts declared official by the President: National Capital Region*. Philippine Statistics Authority. https://psa.gov.ph/content/2020-census-population-and-housing-2020-cph-population-counts-declared-official-president
+Philippine Statistics Authority. (2021). *2020 census of population and housing (2020 CPH) population counts declared official by the President: National Capital Region*. Philippine Statistics Authority. https://psa.gov.ph/
 
 Republic of the Philippines. (2012). *Republic Act No. 10173: Data Privacy Act of 2012*. Official Gazette of the Republic of the Philippines. https://www.officialgazette.gov.ph/2012/08/15/republic-act-no-10173/
 
@@ -302,4 +304,4 @@ Wan, Z., Hook, S., & Hulley, G. (2021). *MOD11A1 MODIS/Terra Land Surface Temper
 
 World Health Organization. (2021). *WHO global air quality guidelines: Particulate matter (PM2.5 and PM10), ozone, nitrogen dioxide, sulfur dioxide and carbon monoxide*. World Health Organization. https://apps.who.int/iris/handle/10665/345329
 
-WorldPop. (2020). *Global high resolution population denominators project: Philippines 100m population counts* [Data set]. University of Southampton. https://doi.org/10.5258/SORD/13860
+WorldPop. (2020). *Global high resolution population denominators project: Philippines 100m population counts* [Data set]. University of Southampton. https://hub.worldpop.org/geodata/summary?id=24785

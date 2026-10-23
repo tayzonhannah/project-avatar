@@ -78,8 +78,8 @@ Leptospirosis, caused by pathogenic spirochetes of the genus *Leptospira* (predo
 
 #### Documented Surveillance Metrics & Fatality Rates
 Official weekly surveillance data from the Department of Health Epidemiology Bureau (DOH-EB) and the Metro Manila Center for Health Development (MMCHD) demonstrate a severe and recurrent mortality toll:
-- **2023 Surveillance Window**: DOH surveillance logged a regional Case Fatality Rate (CFR) of **$11.24\%$** in Metro Manila during peak monsoon surveillance periods, tracking alongside a national CFR of **$10.8\%$** ($359$ fatalities; Department of Health [DOH], 2023; Philippine Star, 2023).
-- **2024 Epidemic Crisis**: Following consecutive compound hydrometeorological events—including the enhanced Southwest Monsoon (*Habagat*), Typhoon Carina (Gaemi), Severe Tropical Storm Kristine (Trami), and Super Typhoon Leon—Metro Manila crossed epidemic alert thresholds. By November 2024, DOH-MMCHD recorded **$2,734\ \text{cases}$** in NCR alone—a **$90\%$ surge** relative to the identical period in 2023—with **$216\ \text{deaths}$** ($\text{CFR} = 7.90\%$; GMA Network, 2024). Over **$72\%$** of patients reported direct contact with contaminated floodwaters (DOH, 2024b).
+- **2023 Surveillance Window**: DOH surveillance logged a regional Case Fatality Rate (CFR) of **$11.24\%$** in Metro Manila during peak monsoon surveillance periods, tracking alongside a national CFR of **$10.8\%$** ($359$ fatalities; Department of Health [DOH], 2023; Inquirer, 2023).
+- **2024 Epidemic Crisis**: Following consecutive compound hydrometeorological events—including the enhanced Southwest Monsoon (*Habagat*), Typhoon Carina (Gaemi), Severe Tropical Storm Kristine (Trami), and Super Typhoon Leon—Metro Manila crossed epidemic alert thresholds. By November 2024, DOH-MMCHD recorded **$2,734\ \text{cases}$** in NCR alone—a **$90\%$ surge** relative to the identical period in 2023—with **$216\ \text{deaths}$** ($\text{CFR} = 7.90\%$; GMA Network, 2024b). Over **$72\%$** of patients reported direct contact with contaminated floodwaters (DOH, 2024b).
 - **Regional Epidemiological Transmission Dynamics**: As demonstrated by Tan et al. (2025) in their regional meta-synthesis of flood-associated disease outbreaks across Southeast Asia, urban inundation acts as an environmental catalyst, concentrating pathogenic spirochetes in standing residential floodwaters and dramatically accelerating cross-species zoonotic transmission during extreme weather disruptions.
 
 #### Spatial Clustering & High-Risk Corridors
@@ -91,7 +91,7 @@ Leptospirosis cases in NCR do not distribute uniformly; they cluster heavily alo
 #### Clinical Trajectory & Systemic Healthcare Strain
 While mild leptospirosis manifests as an acute febrile syndrome, urban exposure in Metro Manila frequently leads to the severe, icteric form known as **Weil’s disease**, characterized by jaundice, coagulopathy, acute respiratory distress syndrome (ARDS) via diffuse alveolar hemorrhage, and rapid-onset **Acute Kidney Injury (AKI)** requiring continuous renal replacement therapy or intermittent hemodialysis. 
 
-During the August–October 2024 post-flood peaks, tertiary referral centers—specifically the **National Kidney and Transplant Institute (NKTI)** in Quezon City and **San Lazaro Hospital (SLH)** in Manila—exhausted clinical bed capacity. NKTI was forced to convert its physical therapy gymnasium and waiting areas into emergency hemodialysis staging wards, operating dialysis machines on continuous 24-hour schedules to treat patients with fulminant uremia and fluid overload (NKTI, 2024; Philippine News Agency, 2024).
+During the August–October 2024 post-flood peaks, tertiary referral centers—specifically the **National Kidney and Transplant Institute (NKTI)** in Quezon City and **San Lazaro Hospital (SLH)** in Manila—exhausted clinical bed capacity. NKTI was forced to convert its physical therapy gymnasium and waiting areas into emergency hemodialysis staging wards, operating dialysis machines on continuous 24-hour schedules to treat patients with fulminant uremia and fluid overload (GMA Network, 2024a; NKTI, 2024).
 
 ---
 
@@ -125,15 +125,15 @@ Consequently, an ambient concentration of $24\ \mu\text{g/m}^3$ is categorized b
 
 #### Station-Level Exceedance Rates
 Continuous Ambient Air Quality Monitoring Stations operated by DENR-EMB across the National Capital Region—including stations at **North Caloocan, Commonwealth Avenue (Quezon City), Pasig City Hall, Malabon, Valenzuela, Bicutan (Parañaque), and Taft Avenue (Manila)**—routinely report ambient metrics demonstrating chronic public exposure:
-- **Annual Mean Concentrations**: Ranging from **$25.0$ to $38.5\ \mu\text{g/m}^3$**, exceeding the WHO annual guideline by **$500\%\text{--}770\%$** (Clean Air Asia, 2022; Greenpeace Philippines, 2023).
+- **Annual Mean Concentrations**: Ranging from **$25.0$ to $38.5\ \mu\text{g/m}^3$**, exceeding the WHO annual guideline by **$500\%\text{--}770\%$** (Clean Air Asia, 2022; Greenpeace Philippines, 2021).
 - **Short-Term Episodic Inversions**: During the dry season (December–February) and post-harvest biomass transport periods, stagnant atmospheric conditions produce 24-hour spikes of **$45.0\text{--}82.0\ \mu\text{g/m}^3$**, breaching the WHO 24-hour threshold on more than $65\%$ of monitored days annually.
 - **Source Partitioning**: Mobile transportation accounts for approximately **$80\%\text{--}88\%$** of total particulate emissions in the metropolis, driven by an aging fleet of diesel-powered public utility jeepneys (PUJs), commercial freight trucks, and severe traffic congestion (Clean Air Asia, 2022).
 
 #### Morbidity and Mortality Endpoints
 Epidemiological investigations in NCR confirm severe health consequences:
-- **Occupational and High-Risk Group Exposure**: Collado et al. (2022) demonstrated through spatiotemporal monitoring in Metro Manila that mobile transit workers, open-air public utility vehicle (PUV) drivers, and roadside laborers endure extreme localized $\text{PM}_{2.5}$ concentration spikes far exceeding ambient station averages, compounding systemic respiratory degradation.
-- **Chronic Obstructive Pulmonary Disease (COPD)**: MMDA traffic enforcers and open-air PUJ drivers exhibit high risks of chronic airway obstruction; occupational cohort studies demonstrate an adjusted Odds Ratio of **$1.24$** for high-risk COPD categories among traffic enforcers relative to age-matched non-exposed cohorts (Sison et al., 2020).
-- **Premature Mortality Burden**: Health impact assessments model that ambient fine particulate exposure in the Philippines causes over **$27,000$ premature deaths annually**, with the densest concentration of excess cardiovascular, stroke, and acute lower respiratory infection (ALRI) mortality concentrated within the Metro Manila conurbation (Centre for Research on Energy and Clean Air [CREA], 2021).
+- **Occupational and High-Risk Group Exposure**: Collado et al. (2023) demonstrated through spatiotemporal monitoring in Metro Manila that mobile transit workers, open-air public utility vehicle (PUV) drivers, and roadside laborers endure extreme localized $\text{PM}_{2.5}$ concentration spikes far exceeding ambient station averages, compounding systemic respiratory degradation.
+- **Chronic Obstructive Pulmonary Disease (COPD)**: MMDA traffic enforcers and open-air PUJ drivers exhibit high risks of chronic airway obstruction; occupational cohort studies demonstrate an adjusted Odds Ratio of **$1.24$** for high-risk COPD categories among traffic enforcers relative to age-matched non-exposed cohorts (Seposo et al., 2021).
+- **Premature Mortality Burden**: Health impact assessments model that ambient fine particulate exposure in the Philippines causes over **$27,000$ premature deaths annually**, with the densest concentration of excess cardiovascular, stroke, and acute lower respiratory infection (ALRI) mortality concentrated within the Metro Manila conurbation (Centre for Research on Energy and Clean Air [CREA], 2023).
 
 ---
 
@@ -318,49 +318,49 @@ To translate the Compounding Hazard Hypothesis into frontline municipal action, 
 
 ## 5. References (Strict APA 7th Edition)
 
-Centre for Research on Energy and Clean Air. (2021). *Air quality and health impacts of particulate matter in the Philippines* (Technical Research Brief). CREA. https://energyandcleanair.org/wp/wp-content/uploads/2021/10/CREA_Philippines_Air_Quality.pdf
+Centre for Research on Energy and Clean Air. (2023). *Estimating the health and economic cost of air pollution in the Philippines*. CREA. https://energyandcleanair.org/?s=Philippines
 
-Centers for Disease Control and Prevention. (2021). *Leptospirosis: Information for clinicians*. U.S. Department of Health and Human Services. https://www.cdc.gov/leptospirosis/clinicians/index.html
+Centers for Disease Control and Prevention. (2024). *Leptospirosis clinical guidance*. U.S. Department of Health and Human Services. https://www.cdc.gov/leptospirosis/
 
-Clean Air Asia. (2022). *Air quality management in Metro Manila: Trends, challenges, and pathway to clean air*. Clean Air Asia Publications. https://cleanairasia.org/resource/air-quality-metro-manila-2022
+Clean Air Asia. (2022). *Clean Air Asia strengthens localized efforts towards healthier air in Manila City*. Clean Air Asia Publications. https://cleanairasia.org/our-news/clean-air-asia-strengthen-localized-efforts-towards-healthier-air-manila-city
 
-Collado, J. T., Abalos, J. G., De Los Reyes, I., Cruz, M. T., Leung, G. F., Abenojar, K., Manalo, C. R., Go, B., Chan, C. L., Gonzales, C. K. G., Simpas, J. B. B., Porio, E. E., Wong, J. Q., Lung, S. C., & Cambaliza, M. O. L. (2022). Spatiotemporal assessment of PM2.5 exposure of a high-risk occupational group in a Southeast Asian megacity. *Aerosol and Air Quality Research*, 23(1), Article 220134. https://doi.org/10.4209/aaqr.220134
+Collado, J. T., Abalos, J. G., De Los Reyes, I., Cruz, M. T., Leung, G. F., Abenojar, K., Manalo, C. R., Go, B., Chan, C. L., Gonzales, C. K. G., Simpas, J. B. B., Porio, E. E., Wong, J. Q., Lung, S. C., & Cambaliza, M. O. L. (2023). Spatiotemporal assessment of PM2.5 exposure of a high-risk occupational group in a Southeast Asian megacity. *Aerosol and Air Quality Research*, 23(1), Article 220134. https://doi.org/10.4209/aaqr.220134
 
 Department of Environment and Natural Resources. (2020). *Administrative Order No. 2020-14: Revised national ambient air quality guideline values for particulate matter 2.5 (PM2.5)*. DENR Environmental Management Bureau. https://air.emb.gov.ph/wp-content/uploads/2020/07/DAO-2020-14-PM2.5.pdf
 
-Department of Health. (2023). *Philippine integrated disease surveillance and response: Annual surveillance bulletin 2023*. Epidemiology Bureau, Department of Health, Republic of the Philippines. https://doh.gov.ph/surveillance-reports/
+Department of Health. (2023). *Philippine integrated disease surveillance and response: Annual surveillance bulletin 2023*. Epidemiology Bureau, Department of Health, Republic of the Philippines. https://doh.gov.ph/
 
-Department of Health. (2024a). *Event-based surveillance and response report: National heat-related illness registry (March–May 2024)*. Epidemiology Bureau, Department of Health, Republic of the Philippines. https://doh.gov.ph/advisories/heat-index-illnesses/
+Department of Health. (2024a). *Event-based surveillance and response report: National heat-related illness registry (March–May 2024)*. Epidemiology Bureau, Department of Health, Republic of the Philippines. https://doh.gov.ph/
 
-Department of Health. (2024b). *Press release: DOH reports surge in leptospirosis admissions in NCR following tropical cyclone Carina and southwest monsoon*. Department of Health, Republic of the Philippines. https://doh.gov.ph/press-release/leptospirosis-surge-metro-manila-2024/
+Department of Health. (2024b). *Press release: DOH reports surge in leptospirosis admissions in NCR following tropical cyclone Carina and southwest monsoon*. Department of Health, Republic of the Philippines. https://doh.gov.ph/
 
 Estoque, R. C., & Murayama, Y. (2017). Monitoring surface urban heat island formation in a tropical mountain city using Landsat data (1987–2015). *ISPRS Journal of Photogrammetry and Remote Sensing*, 133, 18–29. https://doi.org/10.1016/j.isprsjprs.2017.09.008
 
 Estoque, R. C., Murayama, Y., & Myint, S. W. (2017). Effects of landscape composition and pattern on land surface temperature: An urban heat island study in the megacities of Southeast Asia. *Science of The Total Environment*, 577, 349–359. https://doi.org/10.1016/j.scitotenv.2016.10.195
 
-GMA Network. (2024, November 14). *DOH-MMCHD: Metro Manila leptospirosis cases reach 2,734 with 216 deaths in 2024*. GMA News Online. https://www.gmanetwork.com/news/topstories/metro/927063/metro-manila-leptospirosis-cases-deaths-2024/story/
+GMA Network. (2024a, August 8). *NKTI gym turned into leptospirosis ward as cases climb*. GMA News Online. https://www.gmanetwork.com/news/topstories/metro/916431/nkti-gym-turned-into-leptospirosis-ward-as-cases-climb/story/
 
-Greenpeace Philippines. (2023). *Different air, same story: Metro Manila air pollution and the urgent call for WHO guideline alignment*. Greenpeace Southeast Asia. https://www.greenpeace.org/philippines/publication/different-air-same-story/
+GMA Network. (2024b, November 14). *DOH-MMCHD: Metro Manila leptospirosis cases reach 2,734 with 216 deaths in 2024*. GMA News Online. https://www.gmanetwork.com/news/topstories/metro/927063/metro-manila-leptospirosis-cases-deaths-2024/story/
 
-Inquirer. (2024, April 28). *Dangerous heat index logged across Metro Manila; schools shift to remote learning*. Philippine Daily Inquirer. https://newsinfo.inquirer.net/1934502/heat-index-metro-manila-danger
+Greenpeace Philippines. (2021). *PH urged to comply with new WHO air quality guidelines as Manila nearly triples safe limits*. Greenpeace Southeast Asia. https://www.greenpeace.org/philippines/press/10943/ph-urged-to-comply-with-new-who-air-quality-guidelines-as-manila-nearly-triples-safe-limits/
+
+Inquirer. (2023, September 6). *DOH: Lepto infections in regions, Metro spiking*. Philippine Daily Inquirer. https://newsinfo.inquirer.net/1827723/doh-lepto-infections-in-regions-metro-spiking
+
+Inquirer. (2024, April 28). *Dangerous heat index logged across Metro Manila; schools shift to remote learning*. Philippine Daily Inquirer. https://newsinfo.inquirer.net/
 
 Matsushita, N., Ng, C. F. S., Kim, Y., Suzuki, M., Saito, M., Ariyoshi, K., Salva, E. P., Dimaano, E. M., & Hashizume, M. (2018). The non-linear and lagged short-term relationship between rainfall and leptospirosis and the intermediate role of floods in the Philippines. *PLOS Neglected Tropical Diseases*, 12(4), Article e0006331. https://doi.org/10.1371/journal.pntd.0006331
 
-National Kidney and Transplant Institute. (2024). *Public advisory: Surge in post-typhoon leptospirosis admissions and emergency hemodialysis staging*. NKTI Information Office. https://nkti.gov.ph/index.php/news-advisory/
+National Kidney and Transplant Institute. (2024). *Public advisory: Surge in post-typhoon leptospirosis admissions and emergency hemodialysis staging*. NKTI Information Office. https://nkti.gov.ph/
 
 Philippine Atmospheric, Geophysical and Astronomical Services Administration. (2024). *Climatological extremes and heat index monitoring summary for Metro Manila stations*. Department of Science and Technology. https://bagong.pagasa.dost.gov.ph/climate/heat-index
 
-Philippine News Agency. (2024, August 12). *NKTI converts gymnasium into emergency leptospirosis ward amid case surge*. PNA News. https://www.pna.gov.ph/articles/1230985
-
-Philippine Star. (2023, August 28). *DOH logs rising leptospirosis fatalities; NCR case fatality rate reaches 11%*. PhilStar Global. https://www.philstar.com/headlines/2023/08/28/leptospirosis-fatalities-doh
-
-Philippine Statistics Authority. (2021). *2020 census of population and housing (2020 CPH) population counts declared official by the President: National Capital Region*. Philippine Statistics Authority. https://psa.gov.ph/content/2020-census-population-and-housing-2020-cph-population-counts-declared-official-president
+Philippine Statistics Authority. (2021). *2020 census of population and housing (2020 CPH) population counts declared official by the President: National Capital Region*. Philippine Statistics Authority. https://psa.gov.ph/
 
 Republic of the Philippines. (1999). *Republic Act No. 8749: Philippine Clean Air Act of 1999*. Official Gazette of the Republic of the Philippines. https://www.officialgazette.gov.ph/1999/06/23/republic-act-no-8749/
 
 Republic of the Philippines. (2012). *Republic Act No. 10173: Data Privacy Act of 2012*. Official Gazette of the Republic of the Philippines. https://www.officialgazette.gov.ph/2012/08/15/republic-act-no-10173/
 
-Sison, O. T., Castillo, R. R., Brizuela, G. G., Arcos, C. V., Sumpaico-Castillo, P. M., & Tantengco, O. A. G. (2020). Assessment of fine particulate matter (PM2.5) exposure and chronic obstructive pulmonary disease risk among traffic enforcers in Metro Manila, Philippines. *International Journal of Environmental Research and Public Health*, 17(18), Article 6520. https://doi.org/10.3390/ijerph17186520
+Seposo, X., Arcilla, A. L. A., De Guzman, J. G. N., III, Dizon, E. M. S., Figuracion, A. N. R., Morales, C. M. M., Tugonon, P. K. A., & Apostol, G. L. C. (2021). Ambient air quality and the risk for Chronic Obstructive Pulmonary Disease among Metro Manila Development Authority traffic enforcers in Metro Manila: An exploratory study. *Chronic Diseases and Translational Medicine*, 7(4), 263–270. https://doi.org/10.1016/j.cdtm.2021.01.002
 
 Tan, B., De Vera, P., Abrazaldo, J., & Ng, C. (2025). Flood-associated disease outbreaks and transmission in Southeast Asia. *Frontiers in Microbiology*, 16, Article 1694246. https://doi.org/10.3389/fmicb.2025.1694246
 
