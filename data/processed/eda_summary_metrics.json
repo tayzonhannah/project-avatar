@@ -1,0 +1,47 @@
+{
+  "random_state": 42,
+  "spatial_bounds": {
+    "min_lon": 120.85,
+    "max_lon": 121.15,
+    "min_lat": 14.35,
+    "max_lat": 14.8,
+    "crs_storage": "EPSG:4326",
+    "crs_metric": "EPSG:32651",
+    "grid_res_km": 1.0,
+    "n_cols": 30,
+    "n_rows": 45
+  },
+  "optimal_lags": {
+    "primary_peak_lag": 2,
+    "secondary_peak_lag": 3,
+    "sustained_lag": 4,
+    "pearson_r_lag_0": 0.148,
+    "pearson_r_lag_2": 0.6267,
+    "pearson_r_lag_3": 0.5477,
+    "pearson_r_lag_4": 0.2927,
+    "p_value_lag_2": 1.83e-12,
+    "soil_moisture_r_lag_2": 0.4041
+  },
+  "surveillance_delays": {
+    "clinical_presentation_median_days": 4.0,
+    "diagnostic_reporting_median_days": 10.0,
+    "total_surveillance_median_days": 15.0,
+    "total_surveillance_p90_days": 25.0,
+    "total_surveillance_p95_days": 29.0
+  },
+  "missingness": {
+    "dry_season_cloud_pct": 12.666666666666668,
+    "monsoon_season_cloud_pct": 68.0,
+    "routine_missing_onset_pct": 3.4283353985956215,
+    "crisis_missing_onset_pct": 22.5,
+    "recommended_imputation_sensor": "Linear Interpolation / 7-Day Rolling Median"
+  },
+  "target_distribution": {
+    "skewness": 7.5420755527969545,
+    "kurtosis": 73.78220085401252,
+    "zero_inflation_pct": 37.8393665158371,
+    "small_cell_pct": 45.757918552036195,
+    "class_imbalance_ratio": 7.666666666666667,
+    "recommended_lightgbm_scale_pos_weight": 7.666666666666667
+  }
+}
