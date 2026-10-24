@@ -11,7 +11,6 @@ Dual-head gradient boosted decision tree implementation using LightGBM:
 
 from __future__ import annotations
 
-import warnings
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 import pandas as pd
@@ -21,7 +20,6 @@ from sklearn.metrics import (
     average_precision_score,
     roc_auc_score,
     mean_squared_error,
-    mean_absolute_error,
 )
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.linear_model import LogisticRegression

@@ -5,7 +5,7 @@ Interactive Executive Decision Support Command Center.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 from pathlib import Path
 from datetime import date
 import streamlit as st
@@ -31,34 +31,207 @@ from src.api_contracts import (
 
 set_seed(GLOBAL_SEED)
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOGO_PATH = BASE_DIR / "avatar_logo.png"
 
-# Page Configuration
+# =====================================================================
+# 1. GLOBAL PAGE CONFIG & CSS STYLING
+# =====================================================================
+
 st.set_page_config(
-    page_title="Project Avatar | Flood & Outbreak Early Warning",
-    page_icon="🛡️",
+    page_title="Avatar.IQ | NCR Early Warning",
+    page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🛡️",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
-# Geographic Coordinates & Real PSGC Codes for all 17 Metro Manila LGUs
+GLOBAL_CSS = """
+<style>
+/* Import Google Typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+/* Canvas & Global Backgrounds: Warm Alabaster */
+html, body, .stApp, [data-testid="stAppViewContainer"] {
+    background-color: #F3F4F6 !important;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+    color: #0F172A !important;
+}
+
+/* White Shell Container (Edge roundness reduced by 10px to 18px) */
+.block-container {
+    max-width: 1440px !important;
+    padding: 1.25rem 1.75rem !important;
+    background-color: #FFFFFF;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    margin-top: 0.6rem;
+    margin-bottom: 2rem;
+}
+
+/* Hide Default Streamlit Chrome */
+#MainMenu { visibility: hidden; display: none !important; }
+footer { visibility: hidden; display: none !important; }
+header { visibility: hidden; display: none !important; }
+[data-testid="stToolbar"] { visibility: hidden; display: none !important; }
+
+/* Bento Card Classes (Edge roundness reduced by 10px to 12px) */
+.bento-dark {
+    background: linear-gradient(145deg, #16181D 0%, #0F1115 100%);
+    color: #F9FAFB;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bento-light {
+    background: #FFFFFF;
+    color: #0F172A;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.bento-amber {
+    background: linear-gradient(135deg, #FF5B14 0%, #C23B00 100%);
+    color: #FFFFFF;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 10px 30px rgba(255, 91, 20, 0.22);
+}
+
+.pill-orange {
+    background: #FF5B14;
+    color: #FFFFFF;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 0.70rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    letter-spacing: 0.04em;
+}
+
+.orange-dot {
+    width: 9px;
+    height: 9px;
+    background: #FF5B14;
+    border-radius: 3px;
+    display: inline-block;
+    margin-right: 7px;
+    vertical-align: middle;
+}
+
+/* Monospace Tabular Numerals */
+.mono-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Custom Scrollable Bento Feed */
+.bento-scroll {
+    max-height: 310px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.bento-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+.bento-scroll::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.04);
+    border-radius: 3px;
+}
+.bento-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.22);
+    border-radius: 3px;
+}
+
+/* High-Contrast Modern Pill Tabs (Zero overflow, high legibility) */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    gap: 5px !important;
+    background: transparent !important;
+    border-bottom: none !important;
+}
+[data-testid="stTabs"] [data-baseweb="tab-border"] {
+    display: none !important;
+}
+[data-testid="stTabs"] button[role="tab"] {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.73rem !important;
+    color: #1E293B !important;
+    background-color: #F1F5F9 !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    border: 1px solid #CBD5E1 !important;
+    transition: all 0.15s ease-in-out !important;
+}
+[data-testid="stTabs"] button[role="tab"]:hover {
+    color: #FF5B14 !important;
+    background-color: #FFF3EB !important;
+    border-color: #FFB58A !important;
+}
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+    color: #FFFFFF !important;
+    background: #FF5B14 !important;
+    border: 1px solid #FF5B14 !important;
+    box-shadow: 0 2px 8px rgba(255, 91, 20, 0.35) !important;
+}
+
+/* Form Controls & Inputs */
+[data-testid="stSelectbox"] label, [data-testid="stSlider"] label {
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+    color: #1E293B !important;
+}
+[data-testid="stSelectbox"] div[data-baseweb="select"] {
+    border-radius: 8px !important;
+}
+</style>
+"""
+st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
+
+
+# =====================================================================
+# GEOGRAPHIC COORDINATES & METADATA (17 METRO MANILA LGUS)
+# =====================================================================
+
 NCR_LGU_METADATA: Dict[str, Dict[str, float | str]] = {
     "City of Manila": {"psgc": "PH133900000", "lat": 14.5995, "lon": 120.9842},
+    "Manila": {"psgc": "PH133900000", "lat": 14.5995, "lon": 120.9842},
     "Quezon City": {"psgc": "PH137404000", "lat": 14.6760, "lon": 121.0437},
     "City of Caloocan": {"psgc": "PH137501000", "lat": 14.6571, "lon": 120.9841},
+    "Caloocan": {"psgc": "PH137501000", "lat": 14.6571, "lon": 120.9841},
     "City of Las Piñas": {"psgc": "PH137601000", "lat": 14.4445, "lon": 120.9939},
+    "Las Piñas": {"psgc": "PH137601000", "lat": 14.4445, "lon": 120.9939},
+    "Las Pias": {"psgc": "PH137601000", "lat": 14.4445, "lon": 120.9939},
     "City of Makati": {"psgc": "PH137602000", "lat": 14.5547, "lon": 121.0244},
+    "Makati": {"psgc": "PH137602000", "lat": 14.5547, "lon": 121.0244},
     "City of Malabon": {"psgc": "PH137502000", "lat": 14.6625, "lon": 120.9569},
+    "Malabon": {"psgc": "PH137502000", "lat": 14.6625, "lon": 120.9569},
     "City of Mandaluyong": {"psgc": "PH137401000", "lat": 14.5794, "lon": 121.0359},
+    "Mandaluyong": {"psgc": "PH137401000", "lat": 14.5794, "lon": 121.0359},
     "City of Marikina": {"psgc": "PH137402000", "lat": 14.6507, "lon": 121.1029},
+    "Marikina": {"psgc": "PH137402000", "lat": 14.6507, "lon": 121.1029},
     "City of Muntinlupa": {"psgc": "PH137603000", "lat": 14.4081, "lon": 121.0415},
+    "Muntinlupa": {"psgc": "PH137603000", "lat": 14.4081, "lon": 121.0415},
     "City of Navotas": {"psgc": "PH137503000", "lat": 14.6667, "lon": 120.9417},
+    "Navotas": {"psgc": "PH137503000", "lat": 14.6667, "lon": 120.9417},
     "City of Parañaque": {"psgc": "PH137604000", "lat": 14.4793, "lon": 121.0198},
+    "Parañaque": {"psgc": "PH137604000", "lat": 14.4793, "lon": 121.0198},
+    "Paraaque": {"psgc": "PH137604000", "lat": 14.4793, "lon": 121.0198},
     "City of Pasay": {"psgc": "PH137605000", "lat": 14.5378, "lon": 120.9993},
+    "Pasay": {"psgc": "PH137605000", "lat": 14.5378, "lon": 120.9993},
     "City of Pasig": {"psgc": "PH137403000", "lat": 14.5764, "lon": 121.0851},
+    "Pasig": {"psgc": "PH137403000", "lat": 14.5764, "lon": 121.0851},
     "City of San Juan": {"psgc": "PH137405000", "lat": 14.6019, "lon": 121.0355},
+    "San Juan": {"psgc": "PH137405000", "lat": 14.6019, "lon": 121.0355},
     "City of Taguig": {"psgc": "PH137607000", "lat": 14.5176, "lon": 121.0509},
+    "Taguig": {"psgc": "PH137607000", "lat": 14.5176, "lon": 121.0509},
     "City of Valenzuela": {"psgc": "PH137504000", "lat": 14.7011, "lon": 120.9830},
+    "Valenzuela": {"psgc": "PH137504000", "lat": 14.7011, "lon": 120.9830},
     "Municipality of Pateros": {"psgc": "PH137606000", "lat": 14.5454, "lon": 121.0687},
+    "Pateros": {"psgc": "PH137606000", "lat": 14.5454, "lon": 121.0687},
 }
 
 RISK_COLORS: Dict[RiskTier, List[int]] = {
@@ -83,32 +256,33 @@ def format_iso_week_dates(year: int, week: int) -> str:
     except (ValueError, OverflowError):
         return f"Week {week}, {year}"
 
-# Plain-English Environmental Feature Descriptions for Non-Data Audiences
+
+# Environmental Feature Descriptions for Non-Data Audiences
 FEATURE_DESCRIPTIONS: Dict[str, tuple[str, str, str]] = {
     "weekly_rainfall_mm_lag_1": (
-        "Recent Heavy Rain (Past 7 Days)",
+        "Recent Rain (Past 7 Days)",
         "🌧️",
-        "Recent rain causing fresh puddles and overflowing street gutters.",
+        "Recent rain causing fresh puddles and overflowing gutters.",
     ),
     "weekly_rainfall_mm_lag_2": (
-        "Standing Floodwaters (2 Weeks Ago)",
+        "Floodwaters (2 Weeks Ago)",
         "🌊",
-        "Floodwaters from 14 days ago. This is the peak window when leptospirosis bacteria infect people who waded in floods.",
+        "Peak incubation window for leptospirosis after wading in floodwaters.",
     ),
     "weekly_rainfall_mm_lag_3": (
-        "Prior Storm Flooding (3 Weeks Ago)",
+        "Prior Storms (3 Weeks Ago)",
         "💧",
-        "Earlier storms that left ground and drainage channels already waterlogged.",
+        "Earlier storms that left ground and drainage waterlogged.",
     ),
     "weekly_rainfall_mm_lag_4": (
         "Month-Long Wet Ground",
         "🌦️",
-        "Continuous weeks of dampness that help bacteria survive outdoors.",
+        "Persistent dampness aiding prolonged bacterial survival.",
     ),
     "soil_moisture_m3_m3_lag_1": (
         "Mud & Waterlogged Soil",
         "🌱",
-        "Ground soaked with water where bacteria live longer and cannot drain away.",
+        "Ground soaked with water where bacteria live longer.",
     ),
     "soil_moisture_m3_m3_lag_2": (
         "Lingering Wet Mud (2 Weeks Ago)",
@@ -118,22 +292,22 @@ FEATURE_DESCRIPTIONS: Dict[str, tuple[str, str, str]] = {
     "elevation_m": (
         "Low-Lying Land Elevation",
         "📉",
-        "Low elevation where rainwater naturally pools and cannot easily drain to the sea.",
+        "Low elevation where rainwater naturally pools and cannot drain.",
     ),
     "uhi_anomaly": (
         "Urban Heat",
         "🌡️",
-        "Higher ground temperatures that accelerate bacterial growth in shallow water.",
+        "Elevated ground temperatures accelerating bacterial proliferation.",
     ),
     "ndbi_built_up": (
         "Pavement & Concrete Cover",
         "🏢",
-        "Heavy concrete coverage prevents rainwater from soaking into soil, forcing it into streets.",
+        "Heavy concrete cover preventing percolation into soil.",
     ),
     "population_density": (
         "Crowded Residential Areas",
         "👥",
-        "Densely populated neighborhoods where more residents share flooded streets and alleys.",
+        "Densely populated neighborhoods with shared exposure pathways.",
     ),
 }
 
@@ -166,73 +340,44 @@ muni_df, grid_df, lepto_engine, downscaler, rag_engine = initialize_system()
 
 
 # =====================================================================
-# SIDEBAR CONTROLS
+# TEMPORAL STATE & DISASTER PRESETS
 # =====================================================================
 
-st.sidebar.title("Project Avatar")
-st.sidebar.caption("Metro Manila Flood & Disease Early Warning")
-st.sidebar.divider()
-
 available_years = sorted(muni_df["year"].unique())
-default_year = available_years[-1]
+default_year = int(available_years[-1])
 max_week_default = int(muni_df[muni_df["year"] == default_year]["epi_week"].max())
 
 if "surveillance_year" not in st.session_state:
     st.session_state.surveillance_year = default_year
 
 if "epi_week" not in st.session_state:
-    st.session_state.epi_week = min(30, max_week_default)
+    # Default to Typhoon Carina Surge Peak (W32) for instant high-urgency multi-hazard telemetry
+    st.session_state.epi_week = 32
 
-# Disaster Event Quick Presets
-st.sidebar.subheader("⚡ Disaster Event Presets")
-col_p1, col_p2 = st.sidebar.columns(2)
 
-if col_p1.button("Typhoon Carina\n(Jul 22–28, 2024)", use_container_width=True, help="2024 Week 30"):
-    st.session_state.surveillance_year = 2024
-    st.session_state.epi_week = 30
-    st.rerun()
+def on_preset_change():
+    preset_choice = st.session_state.get("disaster_preset_selector")
+    if "Carina Surge Peak" in preset_choice:
+        st.session_state.surveillance_year = 2024
+        st.session_state.epi_week = 32
+    elif "Carina Landfall" in preset_choice:
+        st.session_state.surveillance_year = 2024
+        st.session_state.epi_week = 30
+    elif "Kristine Surge Peak" in preset_choice:
+        st.session_state.surveillance_year = 2024
+        st.session_state.epi_week = 45
+    elif "Kristine Landfall" in preset_choice:
+        st.session_state.surveillance_year = 2024
+        st.session_state.epi_week = 43
+    elif "Normal Baseline" in preset_choice:
+        st.session_state.surveillance_year = 2024
+        st.session_state.epi_week = 28
 
-if col_p2.button("STS Kristine\n(Oct 21–27, 2024)", use_container_width=True, help="2024 Week 43"):
-    st.session_state.surveillance_year = 2024
-    st.session_state.epi_week = 43
-    st.rerun()
 
-st.sidebar.divider()
-
-# Temporal Horizon
-st.sidebar.subheader("📅 Time Horizon")
-selected_year = st.sidebar.selectbox(
-    "Surveillance Year",
-    options=available_years,
-    key="surveillance_year",
-)
-
-max_week = int(muni_df[muni_df["year"] == selected_year]["epi_week"].max())
-if st.session_state.epi_week > max_week:
-    st.session_state.epi_week = max_week
-
-selected_week = st.sidebar.slider(
-    "Week of the Year",
-    min_value=1,
-    max_value=max_week,
-    key="epi_week",
-    help="ISO 8601 epidemiological week (Monday to Sunday).",
-)
-
+# Compute active dates
+selected_year = st.session_state.surveillance_year
+selected_week = st.session_state.epi_week
 current_dates_str = format_iso_week_dates(selected_year, selected_week)
-st.sidebar.info(f"🗓️ **Active Dates:**\n**{current_dates_str}** *(Week {selected_week})*")
-
-st.sidebar.divider()
-
-# Map Display Options
-st.sidebar.subheader("🗺️ Map Display")
-show_pm25 = st.sidebar.checkbox("Overlay Air Quality Surface (PM2.5)", value=True)
-
-st.sidebar.divider()
-st.sidebar.caption(
-    "🔒 **Patient Privacy Notice (RA 10173)**\n\n"
-    "Weekly cases between 1 and 4 are masked as `<5` to protect patient privacy."
-)
 
 
 # =====================================================================
@@ -268,73 +413,160 @@ grid_predictions: List[PM25GridPrediction] = downscaler.downscale_grid(
 )
 
 total_surge_lgus = sum(1 for p in lgu_predictions if p.risk_tier in [RiskTier.HIGH, RiskTier.CRITICAL])
-regional_alert = "CRITICAL" if total_surge_lgus >= 5 else ("ELEVATED" if total_surge_lgus >= 2 else "NORMAL")
+regional_alert = "CRITICAL SURGE" if total_surge_lgus >= 5 else (
+    "ELEVATED WATCH" if total_surge_lgus >= 2 else "NORMAL BASELINE"
+)
+alert_color = "#EF4444" if total_surge_lgus >= 5 else ("#F59E0B" if total_surge_lgus >= 2 else "#10B981")
 
 highest_risk_pred = max(lgu_predictions, key=lambda x: x.outbreak_surge_probability)
+highest_lgu_clean = highest_risk_pred.lgu_name.value.replace("City of ", "").replace("Municipality of ", "")
 mean_pm25 = float(np.mean([p.predicted_pm25_ug_m3 for p in grid_predictions]))
 mean_uhi = float(week_data["uhi_anomaly"].mean()) if "uhi_anomaly" in week_data.columns else 2.5
+heat_tier_str = "Extreme Caution (33–41°C)" if mean_uhi >= 2.0 else "Caution (27–32°C)"
 
-# Sort LGUs by risk probability descending
 sorted_predictions = sorted(lgu_predictions, key=lambda x: x.outbreak_surge_probability, reverse=True)
 sorted_lgu_names = [p.lgu_name.value for p in sorted_predictions]
 
 
 # =====================================================================
-# HEADER: LEAD WITH ONE ANSWER
+# 2. TOP COMMAND & NAVIGATION BAR
 # =====================================================================
 
-st.title("Project Avatar: Flood & Outbreak Early Warning")
-
-highest_lgu_clean = highest_risk_pred.lgu_name.value.replace("City of ", "").replace("Municipality of ", "")
-st.info(
-    f"📍 **Summary for Week {selected_week}, {selected_year} ({current_dates_str}):** "
-    f"**{total_surge_lgus} of 17 Cities at High Risk**. "
-    f"Highest Priority: **{highest_lgu_clean}** ({highest_risk_pred.outbreak_surge_probability:.0%} risk score, expected cases: {highest_risk_pred.suppressed_case_display})."
+top_header_html = (
+    f'<div style="display:flex;justify-content:space-between;align-items:center;'
+    f'margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #E2E8F0;">'
+    f'<div style="display:flex;align-items:center;gap:10px;">'
+    f'<div style="background:linear-gradient(135deg, #FF5B14 0%, #C23B00 100%);'
+    f'width:38px;height:38px;border-radius:8px;display:flex;align-items:center;'
+    f'justify-content:center;box-shadow:0 3px 10px rgba(255,91,20,0.3);">'
+    f'<span style="font-size:18px;line-height:1;">🛡️</span>'
+    f'</div>'
+    f'<div>'
+    f'<div style="display:flex;align-items:center;gap:8px;">'
+    f'<span style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:1.30rem;font-weight:800;color:#0F172A;letter-spacing:-0.02em;">'
+    f'Avatar<span style="color:#FF5B14;">.IQ</span>'
+    f'</span>'
+    f'<span class="pill-orange">SURVEILLANCE ACTIVE</span>'
+    f'</div>'
+    f'<div style="font-size:0.75rem;color:#475569;font-weight:500;">'
+    f'NCR Multi-Hazard Epidemiological Intelligence Platform & Early Warning Command Center'
+    f'</div>'
+    f'</div>'
+    f'</div>'
+    f'<div style="display:flex;align-items:center;gap:8px;">'
+    f'<div style="background:#F1F5F9;border:1px solid #CBD5E1;border-radius:6px;padding:4px 10px;display:flex;align-items:center;gap:6px;">'
+    f'<span style="font-size:12px;">📅</span>'
+    f'<span class="mono-val" style="font-size:0.78rem;font-weight:700;color:#0F172A;">'
+    f'Week {selected_week}, {selected_year}'
+    f'</span>'
+    f'<span style="font-size:0.73rem;color:#475569;">({current_dates_str})</span>'
+    f'</div>'
+    f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;padding:4px 9px;font-size:0.70rem;color:#334155;font-weight:700;">'
+    f'🔒 RA 10173 Active (k ≥ 5)'
+    f'</div>'
+    f'</div>'
+    f'</div>'
 )
+st.markdown(top_header_html, unsafe_allow_html=True)
 
 if fallback_warning:
     st.warning(f"Notice: Epidemiological Week {selected_week} ({selected_year}) lacks live telemetry. Showing latest available observations.")
 
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-kpi1.metric(
-    label="Regional Outbreak Alert",
-    value=regional_alert,
-    delta=f"{total_surge_lgus} of 17 Cities at High Risk",
-    delta_color="inverse" if total_surge_lgus > 0 else "normal",
-)
-kpi2.metric(
-    label="Highest-Risk City",
-    value=highest_lgu_clean,
-    delta=f"{highest_risk_pred.outbreak_surge_probability:.0%} Risk Score",
-    delta_color="inverse",
-)
-kpi3.metric(
-    label="Air Quality (PM2.5)",
-    value=f"{mean_pm25:.1f} µg/m³",
-    delta=f"{mean_pm25 / 15.0:.1f}x WHO 24h Safe Limit (15 µg/m³)",
-    delta_color="inverse",
-)
-kpi4.metric(
-    label="Heat Index Anomaly",
-    value=f"+{mean_uhi:.1f} °C",
-    delta="Extreme Caution (33–41 °C)" if mean_uhi >= 2.0 else "Caution (27–32 °C)",
-    delta_color="inverse",
-)
+# 4-Column Horizontal Interactive Command Bar [1.5, 1.0, 1.5, 1.5]
+col_ctrl1, col_ctrl2, col_ctrl3, col_ctrl4 = st.columns([1.5, 1.0, 1.5, 1.5], gap="medium")
 
-st.divider()
+with col_ctrl1:
+    preset_options = [
+        "Typhoon Carina Surge Peak (W32)",
+        "Typhoon Carina Landfall (W30)",
+        "STS Kristine Surge Peak (W45)",
+        "STS Kristine Landfall (W43)",
+        "Normal Baseline (W28)",
+    ]
+    if selected_week == 32 and selected_year == 2024:
+        p_index = 0
+    elif selected_week == 30 and selected_year == 2024:
+        p_index = 1
+    elif selected_week == 45 and selected_year == 2024:
+        p_index = 2
+    elif selected_week == 43 and selected_year == 2024:
+        p_index = 3
+    elif selected_week == 28 and selected_year == 2024:
+        p_index = 4
+    else:
+        p_index = 0
+
+    st.selectbox(
+        "⚡ Disaster Event Preset",
+        options=preset_options,
+        index=p_index,
+        key="disaster_preset_selector",
+        on_change=on_preset_change,
+        help="Simulate flood inundation (Week 0) vs. 14-day lagged outbreak surges.",
+    )
+
+with col_ctrl2:
+    max_week_for_year = int(muni_df[muni_df["year"] == selected_year]["epi_week"].max())
+    st.slider(
+        "📅 ISO Week (1–52)",
+        min_value=1,
+        max_value=max_week_for_year,
+        key="epi_week",
+        help="ISO 8601 epidemiological week (Monday to Sunday).",
+    )
+
+with col_ctrl3:
+    if "selected_lgu" not in st.session_state:
+        st.session_state.selected_lgu = sorted_lgu_names[0]
+    elif st.session_state.selected_lgu not in sorted_lgu_names:
+        st.session_state.selected_lgu = sorted_lgu_names[0]
+
+    selected_lgu = st.selectbox(
+        "📍 Municipality Focus (17 LGUs)",
+        options=sorted_lgu_names,
+        key="selected_lgu",
+        help="Select any NCR local government unit for localized SHAP & clinical directives.",
+    )
+
+with col_ctrl4:
+    show_pm25 = st.toggle(
+        "🌫️ PM2.5 Surface Overlay",
+        value=True,
+        help="Toggle 1.0 km² downscaled atmospheric raster overlay.",
+    )
+
+selected_pred = next(p for p in lgu_predictions if p.lgu_name.value == selected_lgu)
+selected_lgu_clean = selected_pred.lgu_name.value.replace("City of ", "").replace("Municipality of ", "")
+selected_psgc = str(NCR_LGU_METADATA.get(selected_pred.lgu_name.value, {}).get("psgc", "PH130000000"))
+
+st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
 
 # =====================================================================
-# DIVISION 1: REGIONAL RISK MAP (3D) & MUNICIPAL RISK RANKINGS
-# 🗺️ Regional Risk Map (3D Perspective) | 📋 Municipal Risk Rankings
+# 3. BENTO ROW 1: EXECUTIVE TELEMETRY & 3D SPATIAL COMMAND (7:5)
 # =====================================================================
 
-col_map, col_rankings = st.columns([1.2, 1.0], gap="large")
+row1_col_map, row1_col_kpi = st.columns([7, 5], gap="medium")
 
-with col_map:
-    st.subheader("🗺️ Regional Risk Map (3D Perspective)")
-    st.caption("Taller columns mean higher flood and disease risk. Red and orange pillars show cities most likely to see a leptospirosis outbreak in the next 1–2 weeks.")
+with row1_col_map:
+    # Bento Dark Header for Spatial Map (Edge roundness reduced by 10px to 10px)
+    map_header_html = (
+        f'<div class="bento-dark" style="padding:12px 16px;border-radius:10px 10px 0 0;border-bottom:none;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        f'<div style="display:flex;align-items:center;">'
+        f'<span class="orange-dot"></span>'
+        f'<span style="font-weight:700;font-size:0.95rem;color:#F9FAFB;">NCR Multi-Hazard Spatial Surveillance</span>'
+        f'</div>'
+        f'<span class="pill-orange">{total_surge_lgus}/17 High Risk</span>'
+        f'</div>'
+        f'<div style="font-size:0.72rem;color:#94A3B8;margin-top:2px;">'
+        f'3D Column Heights = Outbreak Probability &nbsp;|&nbsp; Atmospheric Dots = 1km² PM2.5 Surface'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(map_header_html, unsafe_allow_html=True)
 
+    # Prepare PyDeck Map Data
     map_rows = []
     for pred in lgu_predictions:
         lgu_key = pred.lgu_name.value
@@ -353,10 +585,11 @@ with col_map:
         })
     map_df = pd.DataFrame(map_rows)
 
+    # 1km PM2.5 atmospheric grid overlay
     grid_rows = []
     for gp in grid_predictions:
         val = gp.predicted_pm25_ug_m3
-        c = [46, 204, 113, 90] if val <= 15 else ([241, 196, 15, 100] if val <= 35 else [230, 126, 34, 120])
+        c = [46, 204, 113, 110] if val <= 15.0 else ([241, 196, 15, 110] if val <= 35.0 else [230, 126, 34, 110])
         grid_rows.append({"cell_id": gp.cell_id, "lat": gp.latitude, "lon": gp.longitude, "pm25": val, "color": c})
     raster_df = pd.DataFrame(grid_rows)
 
@@ -367,12 +600,14 @@ with col_map:
             data=raster_df,
             get_position=["lon", "lat"],
             get_fill_color="color",
-            get_radius=550,
+            get_radius=350,
+            radius_min_pixels=2,
+            radius_max_pixels=6,
             pickable=True,
             auto_highlight=True,
         ))
 
-    # 3D ColumnLayer plotting
+    # 3D ColumnLayer for LGU Outbreak Extrusion
     layers.append(pdk.Layer(
         "ColumnLayer",
         data=map_df,
@@ -398,95 +633,186 @@ with col_map:
         initial_view_state=view_state,
         map_style="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
         tooltip={
-            "html": "<b>{lgu_name}</b><br/>"
-                    "Risk Level: <b>{risk_tier}</b><br/>"
-                    "Outbreak Probability: <b>{surge_prob}</b><br/>"
-                    "Expected Cases: <b>{cases_display}</b>",
-            "style": {"backgroundColor": "#1e293b", "color": "white", "fontSize": "12px", "padding": "8px"},
+            "html": (
+                "<div style='font-family: sans-serif; font-size: 12px; line-height: 1.4;'>"
+                "<strong style='color: #FF5B14; font-size: 13px;'>{lgu_name}</strong><br/>"
+                "Risk Tier: <b>{risk_tier}</b><br/>"
+                "Surge Probability: <b>{surge_prob}</b><br/>"
+                "Expected Cases: <b>{cases_display}</b>"
+                "</div>"
+            ),
+            "style": {
+                "backgroundColor": "#16181D",
+                "color": "#F9FAFB",
+                "padding": "8px 12px",
+                "borderRadius": "6px",
+                "border": "1px solid rgba(255, 255, 255, 0.15)",
+                "boxShadow": "0 8px 24px rgba(0,0,0,0.4)",
+            },
         },
     )
-    st.pydeck_chart(deck, use_container_width=True)
+    st.pydeck_chart(deck, use_container_width=True, height=390)
 
-with col_rankings:
-    st.subheader("📋 Municipal Risk Rankings")
-    st.caption(f"All 17 Metro Manila local government units ranked by immediate outbreak probability for {current_dates_str} (Week {selected_week}):")
-
-    rank_df = pd.DataFrame([
-        {
-            "Rank": f"#{idx + 1}",
-            "City": p.lgu_name.value.replace("City of ", "").replace("Municipality of ", ""),
-            "Risk Level": p.risk_tier.value,
-            "Outbreak Risk": f"{p.outbreak_surge_probability:.0%}",
-            "Expected Cases": p.suppressed_case_display,
-        }
-        for idx, p in enumerate(sorted_predictions)
-    ])
-    st.dataframe(rank_df, height=390, use_container_width=True, hide_index=True)
-
-
-st.divider()
-
-
-# =====================================================================
-# DIVISION 2: MUNICIPAL DIAGNOSTIC & RISK DRIVERS
-# 🎯 Municipal Diagnostic & Action Center
-# 🔍 What is Driving Risk in This Municipality?
-# =====================================================================
-
-st.subheader("🎯 Municipal Diagnostic & Action Center")
-
-col_sel1, col_sel2 = st.columns([1.2, 1.0])
-with col_sel1:
-    selected_lgu = st.selectbox(
-        "Select City to Inspect:",
-        options=sorted_lgu_names,
-        index=0,
-        help="Select any municipality to see its flood risk causes and emergency instructions.",
-        key="main_lgu_selector",
+with row1_col_kpi:
+    # Top Sub-Card: Priority LGU Spotlight (Solar Amber Gradient, edge roundness reduced to 12px)
+    spotlight_html = (
+        f'<div class="bento-amber" style="margin-bottom:10px;padding:15px 18px;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+        f'<span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;opacity:0.95;">'
+        f'Priority LGU Spotlight'
+        f'</span>'
+        f'<span style="background:rgba(255,255,255,0.25);color:#FFF;border-radius:4px;padding:2px 7px;font-size:0.66rem;font-weight:700;">'
+        f'ACTIVE HOTSPOT'
+        f'</span>'
+        f'</div>'
+        f'<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:1.75rem;font-weight:800;line-height:1.1;margin-bottom:6px;">'
+        f'{highest_lgu_clean}'
+        f'</div>'
+        f'<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px;">'
+        f'<div style="display:flex;align-items:baseline;gap:4px;">'
+        f'<span class="mono-val" style="font-size:1.85rem;font-weight:800;line-height:1;">'
+        f'{highest_risk_pred.outbreak_surge_probability:.0%}'
+        f'</span>'
+        f'<span style="font-size:0.75rem;opacity:0.95;font-weight:600;">Surge Risk</span>'
+        f'</div>'
+        f'<div style="border-left:1px solid rgba(255,255,255,0.3);padding-left:14px;display:flex;align-items:baseline;gap:4px;">'
+        f'<span class="mono-val" style="font-size:1.40rem;font-weight:700;line-height:1;">'
+        f'{highest_risk_pred.suppressed_case_display}'
+        f'</span>'
+        f'<span style="font-size:0.75rem;opacity:0.95;font-weight:600;">Expected Cases</span>'
+        f'</div>'
+        f'</div>'
+        f'<div style="display:flex;flex-wrap:wrap;gap:5px;">'
+        f'<span style="background:rgba(0,0,0,0.24);border:1px solid rgba(255,255,255,0.22);border-radius:4px;padding:2px 7px;font-size:0.68rem;font-weight:600;">'
+        f'🌊 Lepto: {highest_risk_pred.risk_tier.value.upper()}'
+        f'</span>'
+        f'<span style="background:rgba(0,0,0,0.24);border:1px solid rgba(255,255,255,0.22);border-radius:4px;padding:2px 7px;font-size:0.68rem;font-weight:600;">'
+        f'💨 PM2.5: {mean_pm25 / 15.0:.1f}x WHO'
+        f'</span>'
+        f'<span style="background:rgba(0,0,0,0.24);border:1px solid rgba(255,255,255,0.22);border-radius:4px;padding:2px 7px;font-size:0.68rem;font-weight:600;">'
+        f'🌡️ SUHI: +{mean_uhi:.1f}°C'
+        f'</span>'
+        f'</div>'
+        f'</div>'
     )
-    selected_pred = next(p for p in lgu_predictions if p.lgu_name.value == selected_lgu)
+    st.markdown(spotlight_html, unsafe_allow_html=True)
 
-    tier_emojis = {
-        RiskTier.CRITICAL: "🔴",
-        RiskTier.HIGH: "🟠",
-        RiskTier.MODERATE: "🟡",
-        RiskTier.LOW: "🟢",
+    # Bottom Sub-Card: 2x2 Clean KPI Bento Grid (Reduced edge roundness to 8px)
+    kpi_grid_html = (
+        f'<div class="bento-light" style="padding:14px 16px;">'
+        f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;margin-bottom:2px;">'
+        f'Regional Surge Status'
+        f'</div>'
+        f'<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:1.02rem;font-weight:800;color:{alert_color};line-height:1.2;">'
+        f'{regional_alert}'
+        f'</div>'
+        f'<div style="font-size:0.68rem;color:#475569;margin-top:2px;font-weight:600;">'
+        f'{total_surge_lgus}/17 Cities at High Risk'
+        f'</div>'
+        f'</div>'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;margin-bottom:2px;">'
+        f'Peak LGU Risk Score'
+        f'</div>'
+        f'<div class="mono-val" style="font-size:1.02rem;font-weight:800;color:#0F172A;line-height:1.2;">'
+        f'{highest_risk_pred.outbreak_surge_probability:.0%}'
+        f'</div>'
+        f'<div style="font-size:0.68rem;color:#C2410C;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+        f'{highest_lgu_clean}'
+        f'</div>'
+        f'</div>'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;margin-bottom:2px;">'
+        f'Mean NCR PM2.5'
+        f'</div>'
+        f'<div class="mono-val" style="font-size:1.02rem;font-weight:800;color:#0F172A;line-height:1.2;">'
+        f'{mean_pm25:.1f} µg/m³'
+        f'</div>'
+        f'<div style="font-size:0.68rem;color:#B45309;font-weight:700;margin-top:2px;">'
+        f'{mean_pm25 / 15.0:.1f}x WHO Limit'
+        f'</div>'
+        f'</div>'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;margin-bottom:2px;">'
+        f'SUHI Thermal Anomaly'
+        f'</div>'
+        f'<div class="mono-val" style="font-size:1.02rem;font-weight:800;color:#0F172A;line-height:1.2;">'
+        f'+{mean_uhi:.1f} °C'
+        f'</div>'
+        f'<div style="font-size:0.68rem;color:#B45309;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+        f'{heat_tier_str}'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(kpi_grid_html, unsafe_allow_html=True)
+
+st.markdown("<div style='margin-bottom:14px;'></div>", unsafe_allow_html=True)
+
+
+# =====================================================================
+# 4. BENTO ROW 2: THREE-COLUMN DIAGNOSTICS (3.8 : 4.2 : 4.0)
+# =====================================================================
+
+row2_col_shap, row2_col_feed, row2_col_rag = st.columns([3.8, 4.2, 4.0], gap="medium")
+
+# ---------------------------------------------------------------------
+# Column 1: Local TreeSHAP Risk Attribution & LGU Telemetry
+# ---------------------------------------------------------------------
+with row2_col_shap:
+    shap_badge_colors = {
+        RiskTier.CRITICAL: ("rgba(239, 68, 68, 0.15)", "#EF4444", "rgba(239, 68, 68, 0.4)"),
+        RiskTier.HIGH: ("rgba(255, 91, 20, 0.15)", "#FF5B14", "rgba(255, 91, 20, 0.4)"),
+        RiskTier.MODERATE: ("rgba(245, 158, 11, 0.15)", "#D97706", "rgba(245, 158, 11, 0.4)"),
+        RiskTier.LOW: ("rgba(16, 185, 129, 0.15)", "#059669", "rgba(16, 185, 129, 0.4)"),
     }
-    tier_badge = f"{tier_emojis.get(selected_pred.risk_tier, '⚪')} {selected_pred.risk_tier.value.upper()} RISK"
-    st.markdown(f"**Current Status ({current_dates_str}):** **{tier_badge}** &nbsp;|&nbsp; Estimated Weekly Cases: **{selected_pred.suppressed_case_display}**")
-    if selected_pred.is_suppressed:
-        st.caption("🔒 *Case counts between 1 and 4 are masked (<5) to protect patient privacy (RA 10173).*")
-
-with col_sel2:
-    st.metric(
-        label="Outbreak Surge Risk Score",
-        value=f"{selected_pred.outbreak_surge_probability:.0%}",
-        delta="Elevated Surge Risk" if selected_pred.outbreak_surge_probability >= 0.50 else "Normal Baseline",
-        delta_color="inverse" if selected_pred.outbreak_surge_probability >= 0.50 else "normal",
+    s_bg, s_fg, s_border = shap_badge_colors.get(
+        selected_pred.risk_tier,
+        ("rgba(148, 163, 184, 0.15)", "#475569", "rgba(148, 163, 184, 0.4)")
     )
 
-st.markdown("#### 🔍 What is Driving Risk in This Municipality?")
-st.caption("Key environmental triggers identified by the early warning model:")
+    shap_header_html = (
+        f'<div class="bento-light" style="padding:14px 16px 6px 16px;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+        f'<div style="display:flex;align-items:center;">'
+        f'<span class="orange-dot"></span>'
+        f'<span style="font-weight:700;font-size:0.92rem;color:#0F172A;">TreeSHAP Risk Attribution</span>'
+        f'</div>'
+        f'<span style="background:{s_bg};color:{s_fg};border:1px solid {s_border};border-radius:4px;padding:2px 7px;font-size:0.66rem;font-weight:700;">'
+        f'{selected_pred.risk_tier.value.upper()} RISK'
+        f'</span>'
+        f'</div>'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:8px 11px;margin-bottom:8px;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:baseline;">'
+        f'<div>'
+        f'<span style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:1.10rem;font-weight:800;color:#0F172A;">'
+        f'{selected_lgu_clean}'
+        f'</span>'
+        f'<span style="font-size:0.70rem;color:#475569;margin-left:4px;font-weight:600;">({selected_psgc})</span>'
+        f'</div>'
+        f'<div style="text-align:right;">'
+        f'<span class="mono-val" style="font-size:1.20rem;font-weight:800;color:#0F172A;">'
+        f'{selected_pred.outbreak_surge_probability:.0%}'
+        f'</span>'
+        f'<span style="font-size:0.70rem;color:#475569;margin-left:2px;font-weight:600;">Surge Risk</span>'
+        f'</div>'
+        f'</div>'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px;font-size:0.72rem;color:#334155;">'
+        f'<span>Expected Cases: <strong class="mono-val">{selected_pred.suppressed_case_display}</strong></span>'
+        f'<span style="font-size:0.68rem;color:#475569;font-weight:600;">🔒 RA 10173 Protected</span>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(shap_header_html, unsafe_allow_html=True)
 
-shap_data = selected_pred.top_shap_drivers
-sorted_drivers = sorted(shap_data.items(), key=lambda item: abs(item[1]), reverse=True)
+    # Plotly Horizontal Bar Chart: High-contrast typography & visible legend
+    shap_data = selected_pred.top_shap_drivers
+    sorted_drivers = sorted(shap_data.items(), key=lambda item: abs(item[1]), reverse=True)
 
-col_cards, col_chart = st.columns([1.1, 1.0], gap="large")
-
-with col_cards:
-    for feat_key, contribution in sorted_drivers[:3]:
-        title, icon, explanation = FEATURE_DESCRIPTIONS.get(
-            feat_key,
-            (feat_key.replace("_", " ").title(), "⚠️", "Environmental factor contributing to risk profile.")
-        )
-        is_risk_amplifier = contribution > 0
-        tag = "🔴 Increases Disease Risk" if is_risk_amplifier else "🟢 Lowers Risk (Protective)"
-
-        with st.container(border=True):
-            st.markdown(f"**{icon} {title}** &nbsp; `{tag}`")
-            st.write(explanation)
-
-with col_chart:
     chart_items = []
     for feat_key, val in sorted_drivers:
         friendly_title, icon, _ = FEATURE_DESCRIPTIONS.get(
@@ -506,147 +832,296 @@ with col_chart:
         y="Factor",
         orientation="h",
         color="Type",
-        color_discrete_map={"Risk Factor (+)": "#ef4444", "Protective (-)": "#10b981"},
-        title=f"Environmental Conditions Impact on Disease Risk ({selected_lgu.replace('City of ', '').replace('Municipality of ', '')})",
+        color_discrete_map={"Risk Factor (+)": "#EF4444", "Protective (-)": "#10B981"},
     )
     fig_drivers.update_layout(
-        template="plotly_dark",
-        height=260,
-        margin=dict(l=10, r=10, t=35, b=10),
-        xaxis_title="Impact on Outbreak Risk (Left = Protective, Right = Danger)",
+        template="plotly_white",
+        height=280,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Plus Jakarta Sans, Inter, sans-serif", color="#0F172A"),
+        margin=dict(l=150, r=20, t=35, b=30),
+        xaxis_title=dict(
+            text="Impact on Outbreak Risk (Left=Protective, Right=Danger)",
+            font=dict(size=9.5, color="#0F172A", family="Plus Jakarta Sans"),
+        ),
         yaxis_title="",
-        legend=dict(orientation="h", y=1.2, x=0),
+        xaxis=dict(
+            gridcolor="#E2E8F0",
+            tickfont=dict(size=9.5, color="#0F172A"),
+            zeroline=True,
+            zerolinecolor="#94A3B8",
+            zerolinewidth=1.5,
+        ),
+        yaxis=dict(
+            tickfont=dict(size=10, color="#0F172A", family="Plus Jakarta Sans"),
+        ),
+        legend=dict(
+            orientation="h",
+            y=1.18,
+            x=0,
+            font=dict(size=10, color="#0F172A", family="Plus Jakarta Sans"),
+            title=dict(text="Type:", font=dict(size=10, color="#0F172A", family="Plus Jakarta Sans")),
+        ),
+        showlegend=True,
     )
     st.plotly_chart(fig_drivers, use_container_width=True)
 
+# ---------------------------------------------------------------------
+# Column 2: 17-LGU Risk Stratification & Triage Feed
+# ---------------------------------------------------------------------
+with row2_col_feed:
+    feed_rows_html = []
+    for idx, p in enumerate(sorted_predictions):
+        city_clean = p.lgu_name.value.replace("City of ", "").replace("Municipality of ", "")
+        prob_pct = int(p.outbreak_surge_probability * 100)
+        prob_str = f"{p.outbreak_surge_probability:.0%}"
+        cases_str = p.suppressed_case_display
 
-st.divider()
+        # Tier Badge and Bar Colors
+        if p.risk_tier == RiskTier.CRITICAL:
+            tier_badge = (
+                '<span style="background:rgba(239,68,68,0.22);color:#EF4444;'
+                'border:1px solid rgba(239,68,68,0.35);border-radius:4px;'
+                'padding:2px 5px;font-size:0.65rem;font-weight:700;">CRIT</span>'
+            )
+            bar_color = "#EF4444"
+        elif p.risk_tier == RiskTier.HIGH:
+            tier_badge = (
+                '<span style="background:rgba(255,91,20,0.22);color:#FF5B14;'
+                'border:1px solid rgba(255,91,20,0.35);border-radius:4px;'
+                'padding:2px 5px;font-size:0.65rem;font-weight:700;">HIGH</span>'
+            )
+            bar_color = "#FF5B14"
+        elif p.risk_tier == RiskTier.MODERATE:
+            tier_badge = (
+                '<span style="background:rgba(245,158,11,0.22);color:#F59E0B;'
+                'border:1px solid rgba(245,158,11,0.35);border-radius:4px;'
+                'padding:2px 5px;font-size:0.65rem;font-weight:700;">MOD</span>'
+            )
+            bar_color = "#F59E0B"
+        else:
+            tier_badge = (
+                '<span style="background:rgba(16,185,129,0.22);color:#10B981;'
+                'border:1px solid rgba(16,185,129,0.35);border-radius:4px;'
+                'padding:2px 5px;font-size:0.65rem;font-weight:700;">LOW</span>'
+            )
+            bar_color = "#10B981"
 
+        is_focused = (p.lgu_name.value == selected_lgu)
+        row_bg = "rgba(255, 91, 20, 0.14)" if is_focused else "rgba(255, 255, 255, 0.04)"
+        row_border = "1px solid rgba(255, 91, 20, 0.5)" if is_focused else "1px solid rgba(255, 255, 255, 0.07)"
 
-# =====================================================================
-# DIVISION 3: COORDINATED EMERGENCY ACTION CHECKLIST
-# ⚡ Coordinated Emergency Action Checklist
-# Straight to the point, clear and readable for health workers & LGUs
-# =====================================================================
+        row_str = (
+            f'<div style="display:flex;align-items:center;justify-content:space-between;'
+            f'padding:6px 9px;margin-bottom:5px;border-radius:6px;'
+            f'background:{row_bg};border:{row_border};">'
+            f'<div style="display:flex;align-items:center;gap:6px;min-width:110px;">'
+            f'<span class="mono-val" style="font-size:0.70rem;color:#94A3B8;font-weight:700;">#{idx+1:02d}</span>'
+            f'<span style="font-size:0.78rem;font-weight:600;color:#F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{city_clean}</span>'
+            f'</div>'
+            f'<div style="flex:1;max-width:44px;background:rgba(255,255,255,0.08);border-radius:3px;height:5px;overflow:hidden;margin:0 6px;">'
+            f'<div style="width:{prob_pct}%;background:{bar_color};height:100%;border-radius:3px;"></div>'
+            f'</div>'
+            f'<div style="display:flex;align-items:center;gap:6px;">'
+            f'{tier_badge}'
+            f'<span class="mono-val" style="font-size:0.78rem;font-weight:700;color:#F9FAFB;min-width:32px;text-align:right;">{prob_str}</span>'
+            f'<span class="mono-val" style="font-size:0.70rem;color:#94A3B8;min-width:28px;text-align:right;">{cases_str}</span>'
+            f'</div>'
+            f'</div>'
+        )
+        feed_rows_html.append(row_str)
 
-st.subheader("⚡ Coordinated Emergency Action Checklist")
-st.caption(f"Immediate practical directives for local response agencies in {selected_lgu} for the week of {current_dates_str}:")
-
-psgc_id = str(NCR_LGU_METADATA.get(selected_pred.lgu_name.value, {}).get("psgc", "PH130000000"))
-common_req_kwargs = dict(
-    lgu_id=psgc_id,
-    lgu_name=selected_pred.lgu_name,
-    risk_tier=selected_pred.risk_tier,
-    outbreak_surge_probability=selected_pred.outbreak_surge_probability,
-    suppressed_case_display=selected_pred.suppressed_case_display,
-    dominant_shap_drivers=selected_pred.top_shap_drivers,
-    language=LanguageCode.ENGLISH,
-)
-
-adv_health = rag_engine.generate_advisory(RAGAdvisoryRequest(**common_req_kwargs, target_role=StakeholderRole.MUNICIPAL_HEALTH_OFFICER))
-adv_drrmo = rag_engine.generate_advisory(RAGAdvisoryRequest(**common_req_kwargs, target_role=StakeholderRole.DISASTER_RISK_REDUCTION_OFFICER))
-adv_bhw = rag_engine.generate_advisory(RAGAdvisoryRequest(**common_req_kwargs, target_role=StakeholderRole.BARANGAY_HEALTH_WORKER))
-
-col_act1, col_act2, col_act3 = st.columns(3, gap="medium")
-
-with col_act1:
-    with st.container(border=True):
-        st.markdown("#### 🩺 Health Teams (City Health Office & Clinics)")
-        st.caption("Medical triage, clinic stocking, and preventive medicine.")
-        for d in adv_health.prioritized_directives:
-            priority_tag = "🔴 Immediate Action" if "1" in d.priority.value else ("🟠 Urgent Action" if "2" in d.priority.value else "🟢 Routine Protocol")
-            st.markdown(f"**{priority_tag}**")
-            st.markdown(f"**Action:** {d.action_title}")
-            st.write(f"👉 {d.action_description}")
-            st.caption(f"📦 **Supplies Needed:** {d.resource_requirement}")
-            st.markdown("---")
-
-with col_act2:
-    with st.container(border=True):
-        st.markdown("#### 🚨 Disaster Teams (LDRRMO & Engineering)")
-        st.caption("Pumping operations, clearing drainage, and responder safety.")
-        for d in adv_drrmo.prioritized_directives:
-            priority_tag = "🔴 Immediate Action" if "1" in d.priority.value else ("🟠 Urgent Action" if "2" in d.priority.value else "🟢 Routine Protocol")
-            st.markdown(f"**{priority_tag}**")
-            st.markdown(f"**Action:** {d.action_title}")
-            st.write(f"👉 {d.action_description}")
-            st.caption(f"📦 **Equipment Needed:** {d.resource_requirement}")
-            st.markdown("---")
-
-with col_act3:
-    with st.container(border=True):
-        st.markdown("#### 🏘️ Barangay Teams (BHWs & Community Volunteers)")
-        st.caption("House-to-house fever monitoring and community outreach.")
-        for d in adv_bhw.prioritized_directives:
-            priority_tag = "🔴 Immediate Action" if "1" in d.priority.value else ("🟠 Urgent Action" if "2" in d.priority.value else "🟢 Routine Protocol")
-            st.markdown(f"**{priority_tag}**")
-            st.markdown(f"**Action:** {d.action_title}")
-            st.write(f"👉 {d.action_description}")
-            st.caption(f"📦 **Field Materials:** {d.resource_requirement}")
-            st.markdown("---")
-
-# DOH Clinical Prophylaxis Quick Reference Box
-if adv_health.clinical_guidance:
-    cg = adv_health.clinical_guidance
-    with st.container(border=True):
-        st.markdown("#### 💊 DOH Preventive Medicine Guide: What to Give to Exposed Residents")
-        c_rx1, c_rx2 = st.columns([1.5, 1.0])
-        with c_rx1:
-            st.markdown(f"**Standard Medicine:** {cg.drug_and_dosage}")
-            st.markdown(f"**Timing Window:** Must be taken `{cg.timing_window.lower()}`.")
-            st.caption(f"Safe Alternative: {cg.alternative_drug}")
-        with c_rx2:
-            st.warning(f"⚠️ **Do NOT Give To:**\n\n{cg.contraindications}")
-
-
-# =====================================================================
-# BOTTOM EXPANDERS: AUDITING, VALIDATION, AND SCIENTIFIC RIGOR
-# Kept clean and out of the way for non-data viewers, but 100% accessible
-# =====================================================================
-
-st.divider()
-
-with st.expander("📈 Model Accuracy & Historical Out-of-Sample Backtest (For Analysts & Epidemiologists)", expanded=False):
-    st.markdown("### Model Validation & Out-of-Sample Benchmarking")
-    st.markdown(
-        "To ensure real-world predictive validity, the Leptospirosis model is validated using "
-        "walk-forward **TimeSeriesSplit** cross-validation on historical periods it has never trained on. "
-        "It is evaluated against an honest **Naive Lag-1 Persistence Baseline** (predicting next week from last week's reported cases)."
+    joined_feed = "".join(feed_rows_html)
+    feed_card_html = (
+        f'<div class="bento-dark" style="height:100%;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+        f'<div style="display:flex;align-items:center;">'
+        f'<span class="orange-dot"></span>'
+        f'<span style="font-weight:700;font-size:0.92rem;color:#F9FAFB;">17-LGU Stratification Feed</span>'
+        f'</div>'
+        f'<span style="background:rgba(255,255,255,0.12);color:#CBD5E1;border-radius:4px;padding:2px 7px;font-size:0.66rem;font-weight:700;">'
+        f'All 17 LGUs'
+        f'</span>'
+        f'</div>'
+        f'<div class="bento-scroll">'
+        f'{joined_feed}'
+        f'</div>'
+        f'</div>'
     )
+    st.markdown(feed_card_html, unsafe_allow_html=True)
+
+# ---------------------------------------------------------------------
+# Column 3: Role-Specialized RAG Action Cards (Tabs Architecture)
+# ---------------------------------------------------------------------
+with row2_col_rag:
+    common_req_kwargs = dict(
+        lgu_id=selected_psgc,
+        lgu_name=selected_pred.lgu_name,
+        risk_tier=selected_pred.risk_tier,
+        outbreak_surge_probability=selected_pred.outbreak_surge_probability,
+        suppressed_case_display=selected_pred.suppressed_case_display,
+        dominant_shap_drivers=selected_pred.top_shap_drivers,
+        language=LanguageCode.ENGLISH,
+    )
+
+    adv_health = rag_engine.generate_advisory(RAGAdvisoryRequest(**common_req_kwargs, target_role=StakeholderRole.MUNICIPAL_HEALTH_OFFICER))
+    adv_drrmo = rag_engine.generate_advisory(RAGAdvisoryRequest(**common_req_kwargs, target_role=StakeholderRole.DISASTER_RISK_REDUCTION_OFFICER))
+    adv_bhw = rag_engine.generate_advisory(RAGAdvisoryRequest(**common_req_kwargs, target_role=StakeholderRole.BARANGAY_HEALTH_WORKER))
+
+    rag_header_html = (
+        f'<div class="bento-light" style="padding:14px 16px 8px 16px;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+        f'<div style="display:flex;align-items:center;">'
+        f'<span class="orange-dot"></span>'
+        f'<span style="font-weight:700;font-size:0.92rem;color:#0F172A;">Operational Directives</span>'
+        f'</div>'
+        f'<span class="pill-orange" style="font-size:0.65rem;padding:2px 7px;">{selected_lgu_clean}</span>'
+        f'</div>'
+        f'<div style="font-size:0.70rem;color:#475569;margin-bottom:6px;font-weight:500;">'
+        f'Frontline Action Protocols Grounded in DOH Administrative Directives'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(rag_header_html, unsafe_allow_html=True)
+
+    tab_mho, tab_drrmo, tab_bhw, tab_pep = st.tabs([
+        "🏥 Clinical",
+        "🛟 Flood",
+        "🏘️ BHW",
+        "💊 PEP",
+    ])
+
+    with tab_mho:
+        for d in adv_health.prioritized_directives:
+            priority_tag = "🔴 Immediate Action" if "1" in d.priority.value else (
+                "🟠 Urgent Action" if "2" in d.priority.value else "🟢 Routine Protocol"
+            )
+            card_html = (
+                f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;margin-bottom:6px;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+                f'<span style="font-weight:700;font-size:0.70rem;color:#DC2626;">{priority_tag}</span>'
+                f'<span style="font-size:0.68rem;color:#475569;font-weight:600;">📦 Supplies: {d.resource_requirement}</span>'
+                f'</div>'
+                f'<div style="font-weight:700;font-size:0.82rem;color:#0F172A;margin-bottom:2px;">{d.action_title}</div>'
+                f'<div style="font-size:0.75rem;color:#334155;line-height:1.35;">{d.action_description}</div>'
+                f'</div>'
+            )
+            st.markdown(card_html, unsafe_allow_html=True)
+
+    with tab_drrmo:
+        for d in adv_drrmo.prioritized_directives:
+            priority_tag = "🔴 Immediate Action" if "1" in d.priority.value else (
+                "🟠 Urgent Action" if "2" in d.priority.value else "🟢 Routine Protocol"
+            )
+            card_html = (
+                f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;margin-bottom:6px;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+                f'<span style="font-weight:700;font-size:0.70rem;color:#DC2626;">{priority_tag}</span>'
+                f'<span style="font-size:0.68rem;color:#475569;font-weight:600;">📦 Equipment: {d.resource_requirement}</span>'
+                f'</div>'
+                f'<div style="font-weight:700;font-size:0.82rem;color:#0F172A;margin-bottom:2px;">{d.action_title}</div>'
+                f'<div style="font-size:0.75rem;color:#334155;line-height:1.35;">{d.action_description}</div>'
+                f'</div>'
+            )
+            st.markdown(card_html, unsafe_allow_html=True)
+
+    with tab_bhw:
+        for d in adv_bhw.prioritized_directives:
+            priority_tag = "🔴 Immediate Action" if "1" in d.priority.value else (
+                "🟠 Urgent Action" if "2" in d.priority.value else "🟢 Routine Protocol"
+            )
+            card_html = (
+                f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;margin-bottom:6px;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+                f'<span style="font-weight:700;font-size:0.70rem;color:#DC2626;">{priority_tag}</span>'
+                f'<span style="font-size:0.68rem;color:#475569;font-weight:600;">📦 Materials: {d.resource_requirement}</span>'
+                f'</div>'
+                f'<div style="font-weight:700;font-size:0.82rem;color:#0F172A;margin-bottom:2px;">{d.action_title}</div>'
+                f'<div style="font-size:0.75rem;color:#334155;line-height:1.35;">{d.action_description}</div>'
+                f'</div>'
+            )
+            st.markdown(card_html, unsafe_allow_html=True)
+
+    with tab_pep:
+        if adv_health.clinical_guidance:
+            cg = adv_health.clinical_guidance
+            pep_html = (
+                f'<div style="background:#FFF7ED;border:1px solid #FDBA74;border-radius:8px;padding:9px 11px;margin-bottom:7px;">'
+                f'<div style="font-weight:700;font-size:0.82rem;color:#C2410C;margin-bottom:2px;">💊 Standard Medicine & Regimen</div>'
+                f'<div style="font-size:0.76rem;color:#0F172A;"><strong>Medicine:</strong> {cg.drug_and_dosage}</div>'
+                f'<div style="font-size:0.76rem;color:#0F172A;margin-top:2px;"><strong>Timing Window:</strong> {cg.timing_window}</div>'
+                f'<div style="font-size:0.72rem;color:#475569;margin-top:2px;"><strong>Safe Alternative:</strong> {cg.alternative_drug}</div>'
+                f'</div>'
+                f'<div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:9px 11px;">'
+                f'<div style="font-weight:700;font-size:0.82rem;color:#B91C1C;margin-bottom:2px;">⚠️ Prophylaxis Contraindications</div>'
+                f'<div style="font-size:0.75rem;color:#7F1D1D;line-height:1.35;font-weight:500;">{cg.contraindications}</div>'
+                f'<div style="font-size:0.68rem;color:#991B1B;margin-top:4px;font-weight:700;">Statutory Grounding: DOH AO No. 2010-0018</div>'
+                f'</div>'
+            )
+            st.markdown(pep_html, unsafe_allow_html=True)
+
+st.markdown("<div style='margin-bottom:16px;'></div>", unsafe_allow_html=True)
+
+
+# =====================================================================
+# 5. BENTO ROW 3: ANALYST BACKTEST & STATUTORY CITATIONS (FULL-WIDTH)
+# =====================================================================
+
+tab_backtest, tab_statutory = st.tabs([
+    "📈 Walk-Forward Epidemiological Backtest",
+    "⚖️ Statutory & Clinical Grounding (APA 7th)",
+])
+
+with tab_backtest:
+    st.markdown("""
+    <div style="margin-bottom: 10px;">
+        <div style="font-size: 0.78rem; color: #475569; font-weight: 500;">
+            Walk-forward <strong>TimeSeriesSplit</strong> cross-validation on out-of-sample historical periods.
+            Benchmarked against an honest <strong>Naive Lag-1 Persistence Baseline</strong> (predicting next week from last week's reported cases).
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     metrics = lepto_engine.validation_metrics
-    vm1, vm2, vm3, vm4 = st.columns(4)
-    vm1.metric(
-        label="Out-of-Sample PR-AUC",
-        value=f"{metrics.get('out_of_sample_pr_auc', 0.84):.3f}",
-        delta=f"+{metrics.get('pr_auc_lift_over_baseline', 0.42):.3f} vs Naive Baseline",
-    )
-    vm2.metric(
-        label="Naive Baseline PR-AUC",
-        value=f"{metrics.get('naive_baseline_pr_auc', 0.42):.3f}",
-        help="PR-AUC achieved by simply repeating last week's case state.",
-    )
-    vm3.metric(
-        label="PR-AUC Relative Lift",
-        value=f"{metrics.get('relative_lift_pct', 100.0):.1f}%",
-        delta="Performance Advantage",
-    )
-    vm4.metric(
-        label="Out-of-Sample ROC-AUC",
-        value=f"{metrics.get('out_of_sample_roc_auc', 0.88):.3f}",
-    )
+    vm_pr_auc = metrics.get('out_of_sample_pr_auc', 0.84)
+    vm_naive = metrics.get('naive_baseline_pr_auc', 0.42)
+    vm_lift = metrics.get('relative_lift_pct', 100.0)
+    vm_roc_auc = metrics.get('out_of_sample_roc_auc', 0.88)
+    vm_lift_raw = metrics.get('pr_auc_lift_over_baseline', 0.42)
 
-    st.markdown("---")
+    val_kpi_html = (
+        f'<div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:9px;margin-bottom:12px;">'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;">Out-of-Sample PR-AUC</div>'
+        f'<div class="mono-val" style="font-size:1.15rem;font-weight:800;color:#0F172A;margin:2px 0;">{vm_pr_auc:.3f}</div>'
+        f'<div style="font-size:0.68rem;color:#059669;font-weight:700;">+{vm_lift_raw:.3f} vs Naive Baseline</div>'
+        f'</div>'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;">Naive Baseline PR-AUC</div>'
+        f'<div class="mono-val" style="font-size:1.15rem;font-weight:800;color:#475569;margin:2px 0;">{vm_naive:.3f}</div>'
+        f'<div style="font-size:0.68rem;color:#475569;font-weight:600;">Last week persistence</div>'
+        f'</div>'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;">PR-AUC Relative Lift</div>'
+        f'<div class="mono-val" style="font-size:1.15rem;font-weight:800;color:#0F172A;margin:2px 0;">{vm_lift:.1f}%</div>'
+        f'<div style="font-size:0.68rem;color:#C2410C;font-weight:700;">Epidemiological Gain</div>'
+        f'</div>'
+        f'<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;">'
+        f'<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.04em;color:#475569;font-weight:700;">Out-of-Sample ROC-AUC</div>'
+        f'<div class="mono-val" style="font-size:1.15rem;font-weight:800;color:#0F172A;margin:2px 0;">{vm_roc_auc:.3f}</div>'
+        f'<div style="font-size:0.68rem;color:#059669;font-weight:700;">High Discrimination</div>'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(val_kpi_html, unsafe_allow_html=True)
 
-    # Timeline Selector
-    col_sel, _ = st.columns([1.5, 2.0])
-    with col_sel:
-        backtest_lgu_choice = st.selectbox(
-            "Select Municipality for Historical Timeline:",
-            options=["All NCR LGUs (Regional Aggregate)"] + sorted_lgu_names,
-            index=0,
-            key="backtest_lgu_selector",
-        )
+    backtest_lgu_choice = st.selectbox(
+        "Select Historical Timeline Horizon:",
+        options=["All NCR LGUs (Regional Aggregate)"] + sorted_lgu_names,
+        index=0,
+        key="backtest_lgu_selector",
+    )
 
     timeline_data = lepto_engine.backtest_timeline
     if timeline_data is not None:
@@ -672,56 +1147,119 @@ with st.expander("📈 Model Accuracy & Historical Out-of-Sample Backtest (For A
                 .reset_index()
             )
 
+        # Clean HTML chart title above canvas
+        st.markdown(f"""
+        <div style="font-weight: 700; font-size: 0.92rem; color: #0F172A; margin: 8px 0 4px 0;">
+            Walk-Forward Model Backtest vs. Naive Baseline ({backtest_lgu_choice})
+        </div>
+        """, unsafe_allow_html=True)
+
         fig_bt = go.Figure()
 
-        # Observed cases
+        # Ground Truth Reported Cases
         fig_bt.add_trace(go.Scatter(
             x=plot_df["epi_week"],
             y=plot_df["reported_cases"],
-            name="Observed Reported Cases (Ground Truth)",
-            line=dict(color="#ef4444", width=3),
+            name="Observed Cases (Ground Truth)",
+            line=dict(color="#EF4444", width=2.8),
             mode="lines+markers",
         ))
 
-        # Model predicted cases
+        # Model Predicted Cases (LightGBM Tweedie)
         fig_bt.add_trace(go.Scatter(
             x=plot_df["epi_week"],
             y=plot_df["model_predicted_cases"],
-            name="Model Predicted Cases (LightGBM Tweedie)",
-            line=dict(color="#10b981", width=2, dash="dash"),
+            name="Predicted Cases (LightGBM Tweedie)",
+            line=dict(color="#059669", width=2, dash="dash"),
             mode="lines+markers",
         ))
 
-        # Naive lag-1 baseline
+        # Naive Lag-1 Persistence Baseline
         fig_bt.add_trace(go.Scatter(
             x=plot_df["epi_week"],
             y=plot_df["naive_baseline_cases"],
-            name="Naive Baseline (Last Week's Cases)",
-            line=dict(color="#94a3b8", width=1.5, dash="dot"),
+            name="Naive Baseline (Last Week)",
+            line=dict(color="#64748B", width=1.5, dash="dot"),
         ))
 
-        # Rainfall bars
+        # Rainfall Bar (Secondary Y-Axis)
         fig_bt.add_trace(go.Bar(
             x=plot_df["epi_week"],
             y=plot_df["weekly_rainfall_mm"],
             name="Rainfall (mm)",
             yaxis="y2",
-            opacity=0.25,
-            marker_color="#3b82f6",
+            opacity=0.20,
+            marker_color="#0284C7",
         ))
 
-        # Annotations for historical typhoon surge events
-        fig_bt.add_vline(x=30, line_dash="dash", line_color="#eab308", annotation_text="Typhoon Carina (W30)", annotation_position="top left")
-        fig_bt.add_vline(x=43, line_dash="dash", line_color="#a855f7", annotation_text="STS Kristine (W43)", annotation_position="top left")
+        # Vertical line annotations with high-contrast badges
+        fig_bt.add_vline(
+            x=30,
+            line_dash="dash",
+            line_color="#D97706",
+            line_width=2,
+            annotation_text="Typhoon Carina (W30)",
+            annotation_position="top left",
+            annotation=dict(
+                font=dict(size=10, color="#78350F", family="Plus Jakarta Sans"),
+                bgcolor="rgba(254, 243, 199, 0.95)",
+                bordercolor="#F59E0B",
+                borderwidth=1,
+                borderpad=3,
+            ),
+        )
+        fig_bt.add_vline(
+            x=43,
+            line_dash="dash",
+            line_color="#7C3AED",
+            line_width=2,
+            annotation_text="STS Kristine (W43)",
+            annotation_position="top left",
+            annotation=dict(
+                font=dict(size=10, color="#4C1D95", family="Plus Jakarta Sans"),
+                bgcolor="rgba(243, 232, 255, 0.95)",
+                bordercolor="#A855F7",
+                borderwidth=1,
+                borderpad=3,
+            ),
+        )
 
         fig_bt.update_layout(
-            title=f"Walk-Forward Model Backtest vs. Baseline ({backtest_lgu_choice})",
-            xaxis=dict(title="ISO Epidemiological Week"),
-            yaxis=dict(title="Weekly Cases", side="left"),
-            yaxis2=dict(title="Rainfall (mm)", overlaying="y", side="right"),
-            legend=dict(orientation="h", y=1.15),
-            template="plotly_dark",
-            height=420,
+            template="plotly_white",
+            font=dict(family="Plus Jakarta Sans, Inter, sans-serif", color="#0F172A"),
+            xaxis=dict(
+                title=dict(text="ISO Epidemiological Week", font=dict(size=10.5, color="#0F172A", family="Plus Jakarta Sans")),
+                gridcolor="#E2E8F0",
+                tickfont=dict(size=10, color="#0F172A"),
+                zeroline=False,
+            ),
+            yaxis=dict(
+                title=dict(text="Weekly Cases", font=dict(size=10.5, color="#0F172A", family="Plus Jakarta Sans")),
+                side="left",
+                gridcolor="#E2E8F0",
+                tickfont=dict(size=10, color="#0F172A"),
+                zeroline=False,
+            ),
+            yaxis2=dict(
+                title=dict(text="Rainfall (mm)", font=dict(size=10.5, color="#0284C7", family="Plus Jakarta Sans")),
+                overlaying="y",
+                side="right",
+                showgrid=False,
+                tickfont=dict(size=10, color="#0284C7"),
+            ),
+            legend=dict(
+                orientation="h",
+                y=1.12,
+                x=0,
+                font=dict(size=10, color="#0F172A", family="Plus Jakarta Sans"),
+                bgcolor="rgba(255, 255, 255, 0.85)",
+                bordercolor="#CBD5E1",
+                borderwidth=1,
+            ),
+            margin=dict(l=50, r=50, t=20, b=35),
+            height=380,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
         )
         st.plotly_chart(fig_bt, use_container_width=True)
 
@@ -732,15 +1270,30 @@ with st.expander("📈 Model Accuracy & Historical Out-of-Sample Backtest (For A
         "before hospital admissions peak."
     )
 
-
-with st.expander("📚 Official Health Directives & Regulatory Grounding", expanded=False):
-    st.markdown("### Regulatory & Clinical Citations")
-    st.markdown("Action directives and clinical guidelines are grounded in official public health authorities:")
+with tab_statutory:
+    st.markdown("""
+    <div style="margin-bottom: 12px;">
+        <div style="font-weight: 700; font-size: 1.0rem; color: #0F172A; margin-bottom: 3px;">
+            Official Public Health Authorities & Statutory Grounding
+        </div>
+        <div style="font-size: 0.80rem; color: #475569;">
+            All operational directives, medical prophylaxis regimens, and privacy controls are grounded in official public health authorities:
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     for c in adv_health.retrieved_citations:
-        with st.container(border=True):
-            st.markdown(f"**{c.document_title}** — *{c.issuing_authority}*")
-            st.caption(f"Reference: {c.statutory_or_cpg_reference}")
-            st.markdown(f"> \"{c.exact_excerpt}\"")
-            if c.url_or_doi:
-                st.markdown(f"[🔗 Official Source Document Link]({c.url_or_doi})")
+        st.markdown(f"""
+        <div style="background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;">
+            <div style="font-weight: 700; font-size: 0.92rem; color: #0F172A; margin-bottom: 2px;">
+                {c.document_title} <span style="font-weight: 500; color: #475569;">— {c.issuing_authority}</span>
+            </div>
+            <div style="font-size: 0.74rem; color: #C2410C; font-weight: 700; margin-bottom: 4px;">
+                Reference: {c.statutory_or_cpg_reference}
+            </div>
+            <div style="font-size: 0.80rem; color: #1E293B; font-style: italic; border-left: 3px solid #94A3B8; padding-left: 10px; margin-bottom: 5px;">
+                "{c.exact_excerpt}"
+            </div>
+            {f'<a href="{c.url_or_doi}" target="_blank" style="font-size: 0.76rem; color: #0284C7; text-decoration: none; font-weight: 700;">🔗 Official Source Document Link</a>' if c.url_or_doi else ''}
+        </div>
+        """, unsafe_allow_html=True)

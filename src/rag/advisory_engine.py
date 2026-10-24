@@ -57,7 +57,8 @@ REGULATORY_CORPUS: List[Dict[str, str]] = [
         "content": (
             "All Metro Manila Local Health Offices and Rural Health Units are instructed to maintain emergency buffer stocks "
             "of Doxycycline capsules during southwest monsoon (Habagat) and typhoon occurrences. "
-            "Community distribution must be proactive through Barangay Health Centers and evacuation centers before floodwaters recede. "
+            "Community distribution must be proactive through Barangay Health Centers "
+            "and evacuation centers before floodwaters recede. "
             "Stockpiles should scale proportionally with municipal population and local inundation vulnerability."
         ),
         "url": "https://doh.gov.ph/",
@@ -81,10 +82,13 @@ REGULATORY_CORPUS: List[Dict[str, str]] = [
         "authority": "National Kidney and Transplant Institute",
         "reference": "NKTI Clinical Guidance: Acute Kidney Injury Management in Leptospirosis",
         "content": (
-            "During post-typhoon flooding events, tertiary referral centers prepare surge capacity for Acute Kidney Injury (AKI). "
-            "Severe leptospirosis presents with rapid renal impairment, pulmonary involvement (Weil's syndrome), and hyperkalemia. "
+            "During post-typhoon flooding events, tertiary referral centers prepare "
+            "surge capacity for Acute Kidney Injury (AKI). "
+            "Severe leptospirosis presents with rapid renal impairment, "
+            "pulmonary involvement (Weil's syndrome), and hyperkalemia. "
             "Frontline triage screening: Oliguria (< 0.5 mL/kg/h for 6 hours), severe calf tenderness, "
-            "conjunctival suffusion, and elevated serum creatinine require prompt referral for continuous renal replacement therapy."
+            "conjunctival suffusion, and elevated serum creatinine require prompt "
+            "referral for continuous renal replacement therapy."
         ),
         "url": "https://nkti.gov.ph/",
     },
@@ -109,7 +113,8 @@ REGULATORY_CORPUS: List[Dict[str, str]] = [
         "content": (
             "Public health surveillance processing operates under lawful scientific research and emergency health protections. "
             "To safeguard patient confidentiality, epidemiological reporting adheres to statistical disclosure limitation: "
-            "cells with small counts (1 to 4 cases) are suppressed (<5) on public interfaces to prevent indirect re-identification linkage."
+            "cells with small counts (1 to 4 cases) are suppressed (<5) on public interfaces "
+            "to prevent indirect re-identification linkage."
         ),
         "url": "https://www.officialgazette.gov.ph/2012/08/15/republic-act-no-10173/",
     },
@@ -318,7 +323,8 @@ class ChromaAdvisoryEngine:
                         priority=ActionPriority.P1_IMMEDIATE,
                         action_title="Activate Pumping Stations and Enforce Floodgate Clearance",
                         action_description=(
-                            f"Enforce RA 10121 disaster protocols. Expedite floodgate clearance along esteros and river tributaries "
+                            "Enforce RA 10121 disaster protocols. Expedite floodgate clearance along esteros "
+                            f"and river tributaries "
                             f"in {request.lgu_name.value} to prevent prolonged water stagnation."
                         ),
                         target_stakeholder="LDRRMO Engineering & Operations Teams",
@@ -412,7 +418,8 @@ class ChromaAdvisoryEngine:
                             priority=ActionPriority.P2_URGENT if tier == RiskTier.MODERATE else ActionPriority.P3_ROUTINE,
                             action_title="Community Hygiene Outreach & Exposure Logging",
                             action_description=(
-                                f"Educate residents in {request.lgu_name.value} on flood exposure risks and log any accidental contact."
+                                f"Educate residents in {request.lgu_name.value} on flood exposure risks "
+                                f"and log any accidental contact."
                             ),
                             target_stakeholder="Barangay Health Workers",
                             resource_requirement="Information leaflets and clinic intake sheets",
@@ -445,7 +452,11 @@ class ChromaAdvisoryEngine:
             directives.append(
                 ActionDirective(
                     directive_id=f"{advisory_id}-DIR-01",
-                    priority=ActionPriority.P1_IMMEDIATE if tier in [RiskTier.HIGH, RiskTier.CRITICAL] else ActionPriority.P2_URGENT,
+                    priority=(
+                        ActionPriority.P1_IMMEDIATE
+                        if tier in [RiskTier.HIGH, RiskTier.CRITICAL]
+                        else ActionPriority.P2_URGENT
+                    ),
                     action_title="Avoid Wading in Floodwaters & Seek Care if Exposed",
                     action_description=(
                         "Avoid walking or swimming in floodwaters. If contact is unavoidable, wear protective rubber boots "

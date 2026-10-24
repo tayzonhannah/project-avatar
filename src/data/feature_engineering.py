@@ -94,7 +94,7 @@ def calculate_srtm_derivatives(
     roughness = np.zeros_like(elev)
     for r in range(rows):
         for c in range(cols):
-            window = pad_elev[r : r + 3, c : c + 3]
+            window = pad_elev[r:r + 3, c:c + 3]
             roughness[r, c] = np.std(window)
 
     lowland_mask = elev < 5.0
@@ -185,7 +185,8 @@ def build_ncr_feature_store(
     thermal_npz_path: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Generates unified municipal and 1km grid feature matrices with safe relative paths."""
-    p_parquet = Path(processed_parquet_path) if processed_parquet_path else BASE_DIR / "data/processed/analysis_matrix_ncr_eda.parquet"
+    default_parquet = BASE_DIR / "data/processed/analysis_matrix_ncr_eda.parquet"
+    p_parquet = Path(processed_parquet_path) if processed_parquet_path else default_parquet
     p_terrain = Path(terrain_npz_path) if terrain_npz_path else BASE_DIR / "data/raw/terrain/srtm_dem_ncr_1km.npz"
     p_thermal = Path(thermal_npz_path) if thermal_npz_path else BASE_DIR / "data/raw/thermal/landsat_modis_lst_ncr_1km.npz"
 
