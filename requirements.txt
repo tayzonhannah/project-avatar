@@ -94,6 +94,7 @@ parso==0.8.7
 patsy==1.0.3
 pillow==13.0.0
 platformdirs==4.13.5
+plotly==7.1.0
 pluggy==1.7.0
 polars==2.0.0
 polars-runtime-32==2.0.0
