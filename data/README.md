@@ -29,9 +29,18 @@ data/
 ### Coordinate Reference Systems & Temporal Binning Standards
 - **Standard Storage CRS**: `EPSG:4326` (WGS 84 geographic latitude/longitude).
 - **Standard Analysis & Metric CRS**: `EPSG:32651` (WGS 84 / UTM Zone 51N) for area calculations, Euclidean buffer generation, and spatial convolution over Metro Manila.
-- **Temporal Binning Standard**: ISO 8601 Epidemiological Weeks (**EpiWeeks**, Sunday 00:00:00 to Saturday 23:59:59 PHT [UTC+8]), harmonized with the Department of Health (DOH) weekly surveillance reporting cadence.
+- **Temporal Binning Standard**: ISO 8601 Epidemiological Weeks (**EpiWeeks**, Monday 00:00:00 to Sunday 23:59:59 PHT [UTC+8]), harmonized with the Department of Health (DOH) weekly surveillance reporting cadence.
 
 ---
+
+
+---
+
+## 1.1 Data Provenance & Simulation Disclosure
+
+> **Transparency Disclosure**: To guarantee computational reproducibility without exposing proprietary patient-level medical records, the files populated in `data/raw/` are reproducible synthetic fixtures generated via `scripts/generate_raw_fixtures.py` under seed `random_state=42`. 
+> - **Epidemiological Surveillance**: Calibrated to empirical totals and distributions from published DOH-EB annual reports and PIDSR bulletins. The synthetic generation incorporates known pathogen kinetics (peak biological incubation 2-3 weeks post-cyclone); consequently, cross-correlation function (CCF) analysis validates pipeline recovery rather than establishing novel etiologic discovery.
+> - **Environmental & Atmospheric**: Gridded topography is resampled from SRTM DEM grids; air quality series are calibrated against DENR-EMB continuous station distributions.
 
 ## 2. Comprehensive Dataset Catalog & Download Pipelines
 
@@ -201,7 +210,7 @@ Raw Multi-Sensor Ingestion
          └──> Spatial & Temporal Alignment
               - Resample all rasters to standard 100m grid using bilinear interpolation
               - Zonal aggregation across the 17 NCR Municipal Boundaries (GADM / PSA PSGC)
-              - Harmonize all streams into unified ISO EpiWeek bins (Sunday to Saturday)
+              - Harmonize all streams into unified ISO EpiWeek bins (Monday to Sunday)
 ```
 
 ---
@@ -225,7 +234,7 @@ Project Avatar handles public health metrics within a strict legal and ethical f
 | Spatial De-Identification| Absolute restriction to Municipal / City LGU level (17 units in NCR).   |
 |                          | Zero storage of street addresses, barangay micro-locators, or GPS cords.|
 +--------------------------+-------------------------------------------------------------------------+
-| Small Cell Suppression   | Strict k-anonymity rule (k ≥ 5). Any spatial-temporal cell with fewer    |
+| Small Cell Suppression   | Statistical disclosure control (k ≥ 5 convention). Any cell with fewer    |
 | (k-Anonymity Threshold)  | than 5 recorded cases is suppressed or pooled into sub-regional strata.  |
 +--------------------------+-------------------------------------------------------------------------+
 | Attribute Generalization | Age attributes collapsed into broad five-tier epidemiological brackets  |

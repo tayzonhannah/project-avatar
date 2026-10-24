@@ -1,14 +1,13 @@
 """
-Project Avatar: Feature Engineering & Geospatial Transformations Pipeline.
+Project Avatar: Feature Engineering and Geospatial Transformations Pipeline.
 Computes 1-8 week rolling precipitation lags, SRTM topographic derivatives,
 NDBI impervious surface indices, and Topographic Wetness Index (TWI).
-
-Complies with Project Avatar architecture specifications and PJDSC 2026 rubric.
 """
 
 from __future__ import annotations
 
 from typing import Union, List, Optional, Tuple, Dict
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -17,117 +16,85 @@ from src.utils.seed import GLOBAL_SEED, set_seed
 
 set_seed(GLOBAL_SEED)
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 
 # =====================================================================
-# 1. TEMPORAL PRECIPITATION LAG & ROLLING WINDOW FUNCTIONS
+# 1. TEMPORAL PRECIPITATION LAG AND ROLLING WINDOW FUNCTIONS
 # =====================================================================
 
 def calculate_rolling_precipitation_lags(
     data: Union[pd.DataFrame, pl.DataFrame],
     precipitation_col: str = "weekly_rainfall_mm",
     group_col: Optional[str] = "lgu_name",
-    time_col: str = "week",
+    time_col: str = "epi_week",
+    year_col: str = "year",
     max_lag: int = 8,
     include_cumulative: bool = True,
 ) -> Union[pd.DataFrame, pl.DataFrame]:
     """
-    Computes 1 to 8 week historical precipitation lags and cumulative multi-week exposure.
-    Prevents temporal data leakage by strictly shifting backwards in time.
-
-    Args:
-        data: Input Pandas or Polars DataFrame containing time series.
-        precipitation_col: Column name containing weekly rainfall in millimeters.
-        group_col: Column name for municipal group ID (e.g. 'lgu_name'). None for single series.
-        time_col: Column name denoting temporal sequence/week.
-        max_lag: Maximum lag horizon in weeks (default: 8).
-        include_cumulative: If True, computes cumulative 2w-4w and 1w-8w exposure windows.
-
-    Returns:
-        DataFrame of same type as input with added lag columns (e.g., 'rainfall_lag_1w', ...).
+    Computes 1 to 8 week historical precipitation lags without temporal data leakage.
+    Ensures strict chronological sorting across year and epi_week before shifting.
     """
     is_polars = isinstance(data, pl.DataFrame)
-    if is_polars:
-        df_pd = data.to_pandas()
-    else:
-        df_pd = data.copy()
+    df_pd = data.to_pandas() if is_polars else data.copy()
 
-    # Ensure temporal ordering
-    sort_cols = [time_col] if group_col is None else [group_col, time_col]
-    df_pd = df_pd.sort_values(by=sort_cols).reset_index(drop=True)
+    sort_cols = []
+    if group_col and group_col in df_pd.columns:
+        sort_cols.append(group_col)
+    if year_col in df_pd.columns:
+        sort_cols.append(year_col)
+    if time_col in df_pd.columns:
+        sort_cols.append(time_col)
 
-    # Calculate lags 1 through max_lag
+    if sort_cols:
+        df_pd = df_pd.sort_values(by=sort_cols).reset_index(drop=True)
+
     for lag in range(1, max_lag + 1):
         col_name = f"rainfall_lag_{lag}w"
-        if group_col is not None and group_col in df_pd.columns:
+        if group_col and group_col in df_pd.columns:
             df_pd[col_name] = df_pd.groupby(group_col)[precipitation_col].shift(lag)
         else:
             df_pd[col_name] = df_pd[precipitation_col].shift(lag)
-        # Backward fill edge values cleanly to prevent initial NaN dropping
-        df_pd[col_name] = df_pd[col_name].bfill().fillna(0.0)
+        df_pd[col_name] = df_pd[col_name].fillna(0.0)
 
-    # Cumulative exposure windows verified by EDA
     if include_cumulative:
-        # Lag 2 to Lag 4 cumulative exposure (primary clinical surge window)
         df_pd["cumulative_rainfall_2w_to_4w"] = (
             df_pd["rainfall_lag_2w"] + df_pd["rainfall_lag_3w"] + df_pd["rainfall_lag_4w"]
         )
-        # 1-8 week total rolling burden
         lag_cols_8 = [f"rainfall_lag_{k}w" for k in range(1, max_lag + 1)]
         df_pd["cumulative_rainfall_1w_to_8w"] = df_pd[lag_cols_8].sum(axis=1)
 
-    if is_polars:
-        return pl.from_pandas(df_pd)
-    return df_pd
+    return pl.from_pandas(df_pd) if is_polars else df_pd
 
 
 # =====================================================================
-# 2. TOPOGRAPHIC & SRTM DERIVATIVE FUNCTIONS
+# 2. TOPOGRAPHIC AND SRTM DERIVATIVE FUNCTIONS
 # =====================================================================
 
 def calculate_srtm_derivatives(
     elevation_grid: np.ndarray,
     cell_size_m: float = 1000.0,
 ) -> Dict[str, np.ndarray]:
-    """
-    Calculates spatial topographic derivatives from a 2D digital elevation model (DEM).
-    Uses 2nd-order central finite differences across metric grid cells.
-
-    Args:
-        elevation_grid: 2D NumPy array of surface elevation in meters ASL (shape: [rows, cols]).
-        cell_size_m: Spatial resolution in meters (default: 1000.0 m for 1km grid).
-
-    Returns:
-        Dictionary containing:
-            - 'slope_pct': Surface gradient percentage (|dz/dx, dz/dy| * 100)
-            - 'slope_deg': Slope angle in degrees [0, 90]
-            - 'aspect_deg': Compass direction of steepest slope descent [0, 360]
-            - 'roughness_m': Topographic roughness (local standard deviation)
-            - 'lowland_mask': Boolean mask of elevation < 5.0m ASL
-            - 'sluggish_slope_mask': Boolean mask of slope < 0.8% (flood ponding risk)
-    """
+    """Calculates spatial topographic derivatives from a 2D digital elevation model (DEM)."""
     elev = np.asarray(elevation_grid, dtype=np.float64)
     if elev.ndim != 2:
         raise ValueError(f"Elevation grid must be 2D, received shape: {elev.shape}")
 
-    # Central finite differences for partial derivatives dz/dy and dz/dx
     dz_dy, dz_dx = np.gradient(elev, cell_size_m, cell_size_m)
-
-    # Slope gradient magnitude
     gradient_magnitude = np.hypot(dz_dx, dz_dy)
     slope_pct = gradient_magnitude * 100.0
     slope_deg = np.degrees(np.arctan(gradient_magnitude))
 
-    # Aspect in degrees [0, 360] clockwise from North
     aspect_rad = np.arctan2(-dz_dy, dz_dx)
     aspect_deg = (np.degrees(aspect_rad) + 360.0) % 360.0
 
-    # Local roughness: difference between max and min in a 3x3 local neighborhood
     pad_elev = np.pad(elev, pad_width=1, mode="edge")
     rows, cols = elev.shape
     roughness = np.zeros_like(elev)
     for r in range(rows):
         for c in range(cols):
-            window = pad_elev[r:r + 3, c:c + 3]
+            window = pad_elev[r : r + 3, c : c + 3]
             roughness[r, c] = np.std(window)
 
     lowland_mask = elev < 5.0
@@ -148,26 +115,12 @@ def calculate_topographic_wetness_index(
     cell_size_m: float = 1000.0,
     min_slope_rad: float = 0.001,
 ) -> np.ndarray:
-    """
-    Computes the Topographic Wetness Index (TWI):
-        TWI = ln(a / (tan(beta) + eps))
-    where 'a' is the upslope contributing area proxy, and 'beta' is the local slope angle in radians.
-    Higher TWI corresponds to low-lying drainage basins prone to stagnant flood ponding.
-
-    Args:
-        elevation_grid: 2D NumPy array of elevation in meters.
-        cell_size_m: Grid cell size in meters (default: 1000.0).
-        min_slope_rad: Minimum slope angle floor in radians to prevent division by zero.
-
-    Returns:
-        2D array of Topographic Wetness Index values.
-    """
+    """Computes Topographic Wetness Index (TWI) with slope clamping."""
     elev = np.asarray(elevation_grid, dtype=np.float64)
     dz_dy, dz_dx = np.gradient(elev, cell_size_m, cell_size_m)
     slope_rad = np.arctan(np.hypot(dz_dx, dz_dy))
     slope_rad_clamped = np.maximum(slope_rad, min_slope_rad)
 
-    # Simplified specific catchment area proxy (approximated via inverted relative elevation)
     elev_min = np.min(elev)
     elev_range = np.maximum(np.max(elev) - elev_min, 1.0)
     relative_depression = (np.max(elev) - elev) / elev_range
@@ -177,82 +130,85 @@ def calculate_topographic_wetness_index(
     return np.clip(twi, 0.0, 30.0)
 
 
-# =====================================================================
-# 3. REMOTE SENSING SPECTRAL INDICES (NDBI / BUILT-UP)
-# =====================================================================
-
 def calculate_ndbi(
-    swir_band: Union[np.ndarray, pd.Series, pl.Series],
-    nir_band: Union[np.ndarray, pd.Series, pl.Series],
-    epsilon: float = 1e-6,
-) -> Union[np.ndarray, pd.Series, pl.Series]:
+    swir: Union[np.ndarray, float, List[float]],
+    nir: Union[np.ndarray, float, List[float]],
+) -> np.ndarray:
     """
-    Computes the Normalized Difference Built-up Index (NDBI):
-        NDBI = (SWIR - NIR) / (SWIR + NIR + eps)
-    NDBI values > 0 isolate impervious urban infrastructure and dense built settlements.
-
-    Args:
-        swir_band: Shortwave Infrared reflectance values (e.g. Landsat Band 6 / Sentinel-2 B11).
-        nir_band: Near Infrared reflectance values (e.g. Landsat Band 5 / Sentinel-2 B8).
-        epsilon: Small numerical stability term.
-
-    Returns:
-        NDBI array or Series bounded in [-1.0, 1.0].
+    Computes Normalized Difference Built-up Index (NDBI).
+    Formula: (SWIR - NIR) / (SWIR + NIR)
     """
-    if isinstance(swir_band, pl.Series) and isinstance(nir_band, pl.Series):
-        swir = swir_band.to_numpy()
-        nir = nir_band.to_numpy()
-        res = (swir - nir) / (swir + nir + epsilon)
-        return pl.Series("ndbi", np.clip(res, -1.0, 1.0))
-
-    if isinstance(swir_band, pd.Series) and isinstance(nir_band, pd.Series):
-        swir = swir_band.values
-        nir = nir_band.values
-        res = (swir - nir) / (swir + nir + epsilon)
-        return pd.Series(np.clip(res, -1.0, 1.0), index=swir_band.index, name="ndbi")
-
-    swir = np.asarray(swir_band, dtype=np.float64)
-    nir = np.asarray(nir_band, dtype=np.float64)
-    res = (swir - nir) / (swir + nir + epsilon)
-    return np.clip(res, -1.0, 1.0)
+    swir_arr = np.asarray(swir, dtype=np.float64)
+    nir_arr = np.asarray(nir, dtype=np.float64)
+    denom = swir_arr + nir_arr
+    denom = np.where(np.abs(denom) < 1e-8, 1e-8, denom)
+    ndbi = (swir_arr - nir_arr) / denom
+    return np.clip(ndbi, -1.0, 1.0)
 
 
 # =====================================================================
-# 4. COMPREHENSIVE END-TO-END FEATURE STORE GENERATOR
+# 3. COMPREHENSIVE END-TO-END FEATURE STORE GENERATOR
 # =====================================================================
+
+LGU_CENTROIDS: Dict[str, Tuple[float, float]] = {
+    "City of Manila": (14.5995, 120.9842),
+    "Quezon City": (14.6760, 121.0437),
+    "City of Caloocan": (14.6500, 120.9830),
+    "City of Las Piñas": (14.4445, 120.9939),
+    "City of Makati": (14.5547, 121.0244),
+    "City of Malabon": (14.6625, 120.9569),
+    "City of Mandaluyong": (14.5794, 121.0359),
+    "City of Marikina": (14.6507, 121.1029),
+    "City of Muntinlupa": (14.4081, 121.0415),
+    "City of Navotas": (14.6667, 120.9417),
+    "City of Parañaque": (14.4793, 121.0198),
+    "City of Pasay": (14.5378, 120.9997),
+    "City of Pasig": (14.5764, 121.0851),
+    "Municipality of Pateros": (14.5454, 121.0686),
+    "City of San Juan": (14.6019, 121.0355),
+    "City of Taguig": (14.5176, 121.0509),
+    "City of Valenzuela": (14.7011, 120.9830),
+}
+
+
+def assign_lgu_by_proximity(lat: float, lon: float) -> str:
+    """Assigns geographic coordinates to the nearest Metro Manila LGU centroid."""
+    return min(
+        LGU_CENTROIDS.keys(),
+        key=lambda name: (lat - LGU_CENTROIDS[name][0]) ** 2 + (lon - LGU_CENTROIDS[name][1]) ** 2,
+    )
+
 
 def build_ncr_feature_store(
-    processed_parquet_path: str = "data/processed/analysis_matrix_ncr_eda.parquet",
-    terrain_npz_path: str = "data/raw/terrain/srtm_dem_ncr_1km.npz",
-    thermal_npz_path: str = "data/raw/thermal/landsat_modis_lst_ncr_1km.npz",
+    processed_parquet_path: Optional[str] = None,
+    terrain_npz_path: Optional[str] = None,
+    thermal_npz_path: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Generates unified municipal and 1km grid feature matrices complying with
-    Pydantic schemas in src/api_contracts.py.
+    """Generates unified municipal and 1km grid feature matrices with safe relative paths."""
+    p_parquet = Path(processed_parquet_path) if processed_parquet_path else BASE_DIR / "data/processed/analysis_matrix_ncr_eda.parquet"
+    p_terrain = Path(terrain_npz_path) if terrain_npz_path else BASE_DIR / "data/raw/terrain/srtm_dem_ncr_1km.npz"
+    p_thermal = Path(thermal_npz_path) if thermal_npz_path else BASE_DIR / "data/raw/thermal/landsat_modis_lst_ncr_1km.npz"
 
-    Returns:
-        Tuple of (municipal_features_df, grid_features_df).
-    """
     # 1. Load historical epidemiological and meteorological matrix
-    muni_df = pd.read_parquet(processed_parquet_path)
+    muni_df = pd.read_parquet(p_parquet)
 
-    # Standardize column naming if needed
     if "week" in muni_df.columns and "epi_week" not in muni_df.columns:
         muni_df["epi_week"] = muni_df["week"]
 
-    # Calculate 1-8 week lags
+    # Calculate leak-free lags
     muni_df = calculate_rolling_precipitation_lags(
         muni_df,
         precipitation_col="weekly_rainfall_mm",
         group_col="lgu_name",
         time_col="epi_week",
+        year_col="year",
         max_lag=8,
         include_cumulative=True,
     )
 
-    # 2. Load and extract 1km grid features
-    terrain = np.load(terrain_npz_path)
-    thermal = np.load(thermal_npz_path)
+    # 2. Load 1km grid features
+    terrain = np.load(p_terrain)
+    thermal = np.load(p_thermal)
 
     elev_2d = terrain["elevation_m"]
     lats = terrain["lats"]
@@ -262,12 +218,8 @@ def build_ncr_feature_store(
     srtm_derivs = calculate_srtm_derivatives(elev_2d, cell_size_m=1000.0)
     twi_2d = calculate_topographic_wetness_index(elev_2d, cell_size_m=1000.0)
 
-    # Flatten 30x45 grid into 1,350 uniform cells
     rows, cols = elev_2d.shape
     grid_records: List[Dict[str, Union[str, float]]] = []
-
-    # Mapping cell centroids to closest NCR LGU
-    unique_lgus = sorted(muni_df["lgu_name"].unique())
 
     for r in range(rows):
         for c in range(cols):
@@ -275,11 +227,8 @@ def build_ncr_feature_store(
             lon = float(lons[c])
             cell_id = f"GRID_R{r:02d}_C{c:02d}"
 
-            # Approximate nearest LGU based on row/col spatial partitions
-            lgu_idx = int((r / rows) * len(unique_lgus)) % len(unique_lgus)
-            assigned_lgu = unique_lgus[lgu_idx]
-
-            # Simulated SWIR and NIR based on elevation and urban index
+            # Real geographic assignment based on nearest LGU centroid
+            assigned_lgu = assign_lgu_by_proximity(lat, lon)
             elev_val = float(elev_2d[r, c])
             ndbi_val = float(np.clip(0.45 - (elev_val / 200.0) + (np.sin(r + c) * 0.05), -0.5, 0.8))
 
@@ -306,3 +255,31 @@ def build_ncr_feature_store(
 
     grid_df = pd.DataFrame(grid_records)
     return muni_df, grid_df
+
+
+def modulate_grid_for_week(
+    grid_df: pd.DataFrame,
+    epi_week: int,
+    year: int = 2024,
+) -> pd.DataFrame:
+    """
+    Applies seasonal atmospheric modulation to the 1km grid features based on the target EpiWeek.
+    Dry season (Jan-May): warmer temps, stronger SUHI thermal inversion, stagnation.
+    Monsoon season (Jun-Nov): lower SUHI due to cloud cover, higher humidity, atmospheric washout.
+    """
+    df = grid_df.copy()
+    is_monsoon = 24 <= epi_week <= 46
+    if is_monsoon:
+        # Typhoon / monsoon season: enhanced boundary layer mixing, lower stagnation, rain washout
+        df["uhi_seasonal_anomaly_c"] = df["uhi_seasonal_anomaly_c"] * 0.45
+        df["boundary_layer_height_m"] = 1100.0
+        df["relative_humidity_pct"] = 85.0
+        df["wind_u_10m_ms"] = 3.6
+    else:
+        # Dry stagnation season: lower boundary layer, higher heat and particle accumulation
+        df["uhi_seasonal_anomaly_c"] = df["uhi_seasonal_anomaly_c"] * 1.2
+        df["boundary_layer_height_m"] = 620.0
+        df["relative_humidity_pct"] = 68.0
+        df["wind_u_10m_ms"] = 1.6
+
+    return df
