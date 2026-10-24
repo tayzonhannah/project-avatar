@@ -103,7 +103,7 @@
 ```
 
 ### Core Slide Content & Narrative
-- **Axis 1: Waterborne Leptospirosis**: Hyper-endemic across low-lying alluvial plains. In 2024, post-typhoon floods (Carina, Kristine) caused **2,734 NCR cases** (+90% YoY) and **216 deaths** ($\text{CFR} = 7.90\%$; 2023 baseline $\text{CFR} = 11.24\%$). The National Kidney and Transplant Institute (NKTI) was overwhelmed, operating hemodialysis at $>150\%$ capacity and converting its physical therapy gymnasium into an emergency dialysis ward.
+- **Axis 1: Waterborne Leptospirosis**: Hyper-endemic across low-lying alluvial plains. In 2024, preliminary news bulletins reported **2,734 NCR cases** and **216 deaths**, with the full 52-week surveillance dataset recording **6,473 cases** and **623 deaths** ($\text{CFR} = 7.90\%$; 2023 baseline $\text{CFR} = 11.24\%$). The National Kidney and Transplant Institute (NKTI) was overwhelmed, operating hemodialysis at $>150\%$ capacity and converting its physical therapy gymnasium into an emergency dialysis ward.
 - **Axis 2: Chronic Particulate Inhalation**: Ambient $\text{PM}_{2.5}$ across DENR-EMB stations averages **$25.0\text{--}38.5\ \mu\text{g/m}^3$**, chronically exceeding the WHO 2021 annual guideline ($5.0\ \mu\text{g/m}^3$) by **$400\%\text{--}670\%$**. Traffic enforcers and open-air PUV workers suffer an elevated COPD Odds Ratio of **$1.24$** (Seposo et al., 2021).
 - **Axis 3: Thermal Extremes & Urban Heat**: Landsat 8/9 and MODIS thermal infrared products reveal Surface Urban Heat Island (SUHI) anomalies of **$+3.2^\circ\text{C}\text{--}+7.1^\circ\text{C}$** over dense concrete barangays. During the 2024 El Niño heatwave, PAGASA recorded heat indices of **$44^\circ\text{C}\text{--}48^\circ\text{C}$**, forcing school closures and driving emergency presentations for heat syncope and pre-renal dehydration.
 
@@ -243,7 +243,7 @@
 |                                                                                                    |
 |  2. MAR SURVEILLANCE IMPUTATION:                                                                   |
 |     - Impute missing onset dates: Onset Date = Admission Date - 4.0 Days (empirical presentation)  |
-|     - Chi-square test (chi² = 284.62, p < 10^-60) eliminates disaster survivorship selection bias |
+|     - Chi-square test (chi² = 322.95, p < 10^-60) eliminates disaster survivorship selection bias |
 |                                                                                                    |
 |  3. SENSOR TELEMETRY IMPUTATION:                                                                   |
 |     - Trailing 7-Day Rolling Median Filter (MAE = 5.63 µg/m³, r = 0.8278) + Akima Cubic Splines    |
