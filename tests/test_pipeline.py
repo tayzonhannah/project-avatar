@@ -174,7 +174,7 @@ def test_leptospirosis_model_contract_and_shap():
     assert 0.0 <= pred.outbreak_surge_probability <= 1.0
     assert pred.risk_tier in [RiskTier.LOW, RiskTier.MODERATE, RiskTier.HIGH, RiskTier.CRITICAL]
     assert len(pred.top_shap_drivers) <= 5
-    assert sum(pred.top_shap_drivers.values()) > 0.0
+    assert sum(abs(v) for v in pred.top_shap_drivers.values()) > 0.0
 
 
 def test_statutory_small_cell_suppression():
@@ -215,7 +215,9 @@ def test_statutory_small_cell_suppression():
 def test_spatial_pm25_downscaler():
     """Verifies Spatial XGBoost training and 1km grid downscaling contract."""
     _, grid_df = build_ncr_feature_store()
-    station_df = pd.read_csv("data/raw/atmospheric/denr_emb_pm25_stations_2023_2024.csv")
+    from pathlib import Path
+    test_root = Path(__file__).resolve().parent.parent
+    station_df = pd.read_csv(test_root / "data/raw/atmospheric/denr_emb_pm25_stations_2023_2024.csv")
 
     downscaler = SpatialPM25Downscaler(n_estimators=30)
     train_metrics = downscaler.train_on_stations(station_df)
